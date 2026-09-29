@@ -154,7 +154,10 @@ td.neg{color:var(--red)}
  <section class="panel">
   <h2>월별 영업이익</h2>
   <p class="hint">공헌이익에서 고정비와 변동비를 뺀 금액입니다. 막대에 마우스를 올리면 영업이익률이 보입니다.</p>
-  <div class="scroll"><svg id="op" viewBox="0 0 900 250" style="width:100%;min-width:560px;height:auto"  <section class="panel">
+  <div class="scroll"><svg id="op" viewBox="0 0 900 250" style="width:100%;min-width:560px;height:auto" role="img" aria-label="월별 영업이익"></svg></div>
+ </section>
+
+ <section class="panel">
   <h2>제품별 공헌이익</h2>
   <p class="hint">제품을 고르면 그 제품의 공헌이익(광고비까지 뺀 금액)을 월별로 보여줍니다. 모든 채널 합산입니다.</p>
   <div class="tabs" id="p-tabs" role="group" aria-label="제품 선택"></div>
@@ -162,14 +165,13 @@ td.neg{color:var(--red)}
   <div class="scroll"><svg id="pcm" viewBox="0 0 900 250" style="width:100%;min-width:560px;height:auto" role="img" aria-label="제품 월별 공헌이익"></svg></div>
  </section>
 
- <div class="legend" id="prod-legend"></div>
- </section>
-
  <section class="panel">
   <h2>제품별 매출 대비 광고비</h2>
-  <p class="hint">모든 채널 합산입니다. 매출은 자사몰·네이버·쿠팡·M몰에 자사몰·네이버 배송비 수입까지 포함했고, 광고비는 자사몰(META·구글·카카오)·네이버·쿠팡 광고를 모두 더했습니다.</p>
-  <div id="adr"></div>
-  <div class="legend"><span><i style="background:var(--blue-dim);border:1px solid var(--blue)"></i>매출 (배송비 수입 포함)</span><span><i style="background:var(--yellow)"></i>광고비</span></div>
+  <p class="hint">제품을 고르면 월별 매출과 광고비를 나란히 보여줍니다. 매출은 모든 채널(배송비 수입 포함), 광고비는 자사몰·네이버·쿠팡 광고를 모두 더했습니다. 막대 위 숫자는 광고비율입니다.</p>
+  <div class="tabs" id="a-tabs" role="group" aria-label="제품 선택"></div>
+  <div class="pk" id="a-kpis"></div>
+  <div class="scroll"><svg id="adm" viewBox="0 0 900 260" style="width:100%;min-width:560px;height:auto" role="img" aria-label="제품 월별 매출과 광고비"></svg></div>
+  <div class="legend"><span><i style="background:var(--blue)"></i>매출</span><span><i style="background:var(--yellow)"></i>광고비</span></div>
  </section>
 
  <section class="panel">
@@ -333,19 +335,29 @@ function renderProd(){
  monthBars('pcm',900,250,vals,{tip:(d,m)=>`<b>${name} · ${MONTHS[m]}</b><br>공헌이익 <span class="num">${won(d.v)}</span> (${pct(d.v/d.s.sales)})<br>매출 <span class="num">${fmt(d.s.sales)}</span> · 광고비 <span class="num">${fmt(d.s.ads)}</span><br>`+CHANNELS.map((c,ci)=>`${sw(CH_COLOR[c.id])}${c.name} <span class="num">${fmt(d.ch[ci])}</span>`).join('<br>')});
 }
 
+S.adp='PH';
 function renderAdr(){
- const pm=period();
- const rows=PRODUCTS.map(p=>({p,s:sum(pick({months:pm,prod:p.id}))})).sort((a,b)=>b.s.sales-a.s.sales);
- const all=sum(pick({months:pm}));
- const mx=Math.max(...rows.map(r=>r.s.sales),1);
- let h='<div class="prow head adr"><span>제품</span><span>매출 · 광고비</span><span class="r">광고비율</span><span class="r share">ROAS</span></div>';
- const line=(name,s,scale,cls)=>{const w=Math.max(0,s.sales)/scale*100,aw=Math.max(0,s.ads)/scale*100;const r=s.ads/s.sales;
-  return `<div class="prow adr ${cls||''}"><span>${name}</span><div class="track" style="background:none"><div class="fill" style="width:${w}%;background:var(--blue-dim);box-shadow:inset 0 0 0 1px var(--blue)"></div><div class="fill" style="width:${aw}%;background:var(--yellow)"></div><span class="amt" style="left:${Math.min(w,70)}%">${fmt(s.sales)} · 광고 ${fmt(s.ads)}</span></div><span class="r" style="color:${r>=.3?'var(--red)':'var(--fg)'};font-weight:600">${pct(r)}</span><span class="r share">${s.ads?Math.round(s.sales/s.ads*100)+'%':'—'}</span></div>`;};
- rows.forEach(r=>h+=line(r.p.name,r.s,mx));
- h+=`<div style="height:6px"></div>`+line('전체',all,all.sales,'tot');
- $('adr').innerHTML=h;
- const els=$('adr').querySelectorAll('.prow.adr:not(.head)');const list=[...rows.map(r=>r.p.name),'전체'];const ss=[...rows.map(r=>r.s),all];
- els.forEach((d,i)=>hover(d,()=>`<b>${list[i]}</b><br>매출 <span class="num">${won(ss[i].sales)}</span> (배송비 수입 ${fmt(ss[i].shipInc)} 포함)<br>광고비 <span class="num">${won(ss[i].ads)}</span><br>매출 대비 광고비 ${pct(ss[i].ads/ss[i].sales)}`));
+ const tabs=$('a-tabs');
+ tabs.innerHTML=PROD_ORDER.map(id=>`<button class="pbtn" data-p="${id}" aria-pressed="${id===S.adp}">${PRODUCTS.find(p=>p.id===id).name}</button>`).join('');
+ tabs.querySelectorAll('button').forEach(b=>b.onclick=()=>{S.adp=b.dataset.p;renderAdr();});
+ const pm=period();const s=sum(pick({months:pm,prod:S.adp}));
+ $('a-kpis').innerHTML=[['매출',fmt(s.sales)],['광고비',fmt(s.ads)],['매출 대비 광고비',pct(s.ads/s.sales)],['ROAS',s.ads?Math.round(s.sales/s.ads*100)+'%':'—']].map(([l,v])=>`<div><span class="l">${l}</span><span class="v num">${v}</span></div>`).join('');
+ const svg=$('adm');svg.innerHTML='';const W=900,H=260,L=56,R=8,T=26,B=28;
+ const t=ALL.map(m=>sum(pick({months:[m],prod:S.adp})));
+ const top=niceMax(Math.max(...t.map(x=>x.sales),1));const y=v=>T+(1-v/top)*(H-T-B);
+ for(let i=0;i<=4;i++){const v=top*i/4;el('line',{x1:L,x2:W-R,y1:y(v),y2:y(v),class:'gl'},svg);txt(svg,L-6,y(v)+4,fmt(v),{'text-anchor':'end'});}
+ el('line',{x1:L,x2:W-R,y1:y(0),y2:y(0),stroke:'var(--line2)'},svg);
+ const bw=(W-L-R)/8,w=bw*.3;const name=PRODUCTS.find(p=>p.id===S.adp).name;
+ t.forEach((x,m)=>{
+  const g=el('g',{opacity:S.month!=='all'&&+S.month!==m?.3:1},svg);const x0=L+m*bw+bw*.19;
+  el('rect',{x:x0,y:y(Math.max(0,x.sales)),width:w,height:Math.max(1,y(0)-y(Math.max(0,x.sales))),rx:3,fill:'var(--blue)'},g);
+  el('rect',{x:x0+w+3,y:y(x.ads),width:w,height:Math.max(1,y(0)-y(x.ads)),rx:3,fill:'var(--yellow)'},g);
+  const r=x.sales>0?x.ads/x.sales:NaN;
+  txt(g,x0+w+1.5,y(Math.max(x.sales,x.ads))-8,pct(r),{'text-anchor':'middle',class:'val','font-weight':600,fill:r>=.35?'var(--red)':'var(--fg)'});
+  txt(svg,x0+w+1.5,H-B+16,MONTHS[m],{'text-anchor':'middle'});
+  const hit=el('rect',{x:L+m*bw,y:T,width:bw,height:H-T-B,fill:'transparent'},svg);
+  hover(hit,()=>`<b>${name} · ${MONTHS[m]}</b><br>${sw('var(--blue)')}매출 <span class="num">${won(x.sales)}</span><br>${sw('var(--yellow)')}광고비 <span class="num">${won(x.ads)}</span><br>광고비율 ${pct(r)} · ROAS ${x.ads?Math.round(x.sales/x.ads*100)+'%':'—'}`);
+ });
 }
 
 function renderUnit(){
