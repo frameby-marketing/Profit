@@ -138,9 +138,9 @@ td.neg{color:var(--red)}
   </section>
   <section class="panel">
    <h2>월별 공헌이익</h2>
-   <p class="hint">광고비까지 뺀 금액입니다. 이 금액으로 고정비를 덮어야 합니다. 점선은 그 달 고정비+변동비입니다.</p>
+   <p class="hint">광고비까지 뺀 공헌이익과 그 달 고정비+변동비를 나란히 놓았습니다. 막대 위 숫자는 차이(부족분)입니다.</p>
    <div class="scroll"><svg id="cm" viewBox="0 0 520 250" style="width:100%;min-width:420px;height:auto" role="img" aria-label="월별 공헌이익"></svg></div>
-   <div class="legend"><span><i style="background:var(--accent)"></i>공헌이익</span><span><i style="background:none;border-top:2px dashed var(--red);border-radius:0;height:0;width:14px"></i>고정비+변동비</span></div>
+   <div class="legend"><span><i style="background:var(--accent)"></i>공헌이익</span><span><i style="background:var(--red);opacity:.75"></i>고정비+변동비</span></div>
   </section>
  </div>
 
@@ -291,9 +291,22 @@ function renderRev(){
  $('rev-legend').innerHTML=CHANNELS.map(c=>`<span><i style="background:${CH_COLOR[c.id]}"></i>${c.name}</span>`).join('');
 }
 function renderCm(){
- const t=ALL.map(m=>totals([m]));
- monthBars('cm',520,250,t.map(s=>({v:s.contrib,s})),{line:t.map(s=>s.fixed+s.variable),
-  tip:(d,m)=>`<b>${MONTHS[m]}</b><br>공헌이익 <span class="num">${won(d.s.contrib)}</span> (${pct(d.s.contrib/d.s.sales)})<br>고정비+변동비 <span class="num">${won(d.s.fixed+d.s.variable)}</span><br>부족분 <span class="num">${won(d.s.contrib-d.s.fixed-d.s.variable)}</span>`});
+ const svg=$('cm');svg.innerHTML='';const W=520,H=250,L=52,R=8,T=26,B=28;
+ const t=ALL.map(m=>totals([m]));const cost=t.map(s=>s.fixed+s.variable);
+ const top=niceMax(Math.max(...t.map(s=>s.contrib),...cost));const y=v=>T+(1-v/top)*(H-T-B);
+ for(let i=0;i<=4;i++){const v=top*i/4;el('line',{x1:L,x2:W-R,y1:y(v),y2:y(v),class:'gl'},svg);txt(svg,L-6,y(v)+4,fmt(v),{'text-anchor':'end'});}
+ el('line',{x1:L,x2:W-R,y1:y(0),y2:y(0),stroke:'var(--line2)'},svg);
+ const bw=(W-L-R)/8,w=bw*.34;
+ t.forEach((s,m)=>{
+  const g=el('g',{opacity:S.month!=='all'&&+S.month!==m?.3:1},svg);const x0=L+m*bw+bw*.15;
+  el('rect',{x:x0,y:y(s.contrib),width:w,height:Math.max(1,y(0)-y(s.contrib)),rx:3,fill:'var(--accent)'},g);
+  el('rect',{x:x0+w+2,y:y(cost[m]),width:w,height:Math.max(1,y(0)-y(cost[m])),rx:3,fill:'var(--red)',opacity:.75},g);
+  const gap=s.contrib-cost[m];
+  txt(g,x0+w+1,y(Math.max(s.contrib,cost[m]))-7,fmt(gap),{'text-anchor':'middle',class:'val','font-size':10,fill:gap<0?'var(--red)':'var(--green)'});
+  txt(svg,x0+w+1,H-B+16,MONTHS[m],{'text-anchor':'middle'});
+  const hit=el('rect',{x:L+m*bw,y:T,width:bw,height:H-T-B,fill:'transparent'},svg);
+  hover(hit,()=>`<b>${MONTHS[m]}</b><br>${sw('var(--accent)')}공헌이익 <span class="num">${won(s.contrib)}</span><br>${sw('var(--red)')}고정비+변동비 <span class="num">${won(cost[m])}</span><br>차이 <span class="num">${won(gap)}</span>`);
+ });
 }
 function renderOp(){
  const t=ALL.map(m=>totals([m]));
