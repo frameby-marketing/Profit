@@ -88,6 +88,14 @@ td.neg{color:var(--red)}
 .prow .r{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:12px;color:var(--fg2)}
 .prow.adr{grid-template-columns:120px minmax(0,1fr) 72px 68px}
 .prow.tot{border-bottom:none;font-weight:600}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.pbtn{font:inherit;font-size:13px;color:var(--fg2);background:var(--surface2);border:1px solid var(--line);border-radius:20px;padding:6px 14px;cursor:pointer}
+.pbtn:hover{color:var(--fg)}
+.pbtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.pk{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.pk div{background:var(--surface2);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.pk .l{font-size:11px;color:var(--muted)} .pk .v{font-size:18px;font-weight:500}
+@media (max-width:640px){.pk{grid-template-columns:repeat(2,minmax(0,1fr))}}
 #tip{position:fixed;pointer-events:none;background:var(--surface2);color:var(--fg);border:1px solid var(--line2);font-size:12px;padding:7px 10px;border-radius:6px;z-index:20;white-space:nowrap;line-height:1.5;box-shadow:0 4px 14px rgba(0,0,0,.25)}
 @media (max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi.hero{grid-column:span 2}.grid2{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:560px){.prow,.prow.adr{grid-template-columns:84px minmax(0,1fr) 60px}.prow .share{display:none}}
@@ -118,7 +126,6 @@ td.neg{color:var(--red)}
   <ul class="assume">
    <li><b>제품 장사는 됩니다.</b> 광고비까지 빼고도 매출의 약 30%가 남습니다.</li>
    <li><b>고정비를 못 덮습니다.</b> 월평균 공헌이익 약 4,300만 원, 고정비+변동비 약 7,600만 원으로 매달 3,000만 원 이상 부족합니다.</li>
-   <li><b>매출이 줄고 있습니다.</b> 1월 2.07억 → 7~8월 약 1억. 공헌이익률도 30~32%에서 25~28%로 내려왔습니다. 고정비는 7,800만 → 4,300만 원으로 줄어 8월 적자가 가장 작습니다.</li>
    <li><b>8월 기준 흑자 조건</b>: 고정비 그대로면 월매출 약 1.55억, 매출 그대로면 고정비 월 약 2,900만 원 이하.</li>
   </ul>
  </section>
@@ -138,23 +145,24 @@ td.neg{color:var(--red)}
   </section>
   <section class="panel">
    <h2>월별 공헌이익</h2>
-   <p class="hint">광고비까지 뺀 공헌이익과 그 달 고정비+변동비를 나란히 놓았습니다. 막대 위 숫자는 차이(부족분)입니다.</p>
+   <p class="hint">막대는 그 달 고정비+변동비, 선은 광고비까지 뺀 공헌이익입니다. 선이 막대 위로 올라가야 흑자입니다.</p>
    <div class="scroll"><svg id="cm" viewBox="0 0 520 250" style="width:100%;min-width:420px;height:auto" role="img" aria-label="월별 공헌이익"></svg></div>
-   <div class="legend"><span><i style="background:var(--accent)"></i>공헌이익</span><span><i style="background:var(--red);opacity:.75"></i>고정비+변동비</span></div>
+   <div class="legend"><span><i style="background:var(--accent);height:3px;width:14px;border-radius:2px;vertical-align:3px"></i>공헌이익</span><span><i style="background:var(--red);opacity:.45"></i>고정비+변동비</span></div>
   </section>
  </div>
 
  <section class="panel">
   <h2>월별 영업이익</h2>
   <p class="hint">공헌이익에서 고정비와 변동비를 뺀 금액입니다. 막대에 마우스를 올리면 영업이익률이 보입니다.</p>
-  <div class="scroll"><svg id="op" viewBox="0 0 900 250" style="width:100%;min-width:560px;height:auto" role="img" aria-label="월별 영업이익"></svg></div>
+  <div class="scroll"><svg id="op" viewBox="0 0 900 250" style="width:100%;min-width:560px;height:auto"  <section class="panel">
+  <h2>제품별 공헌이익</h2>
+  <p class="hint">제품을 고르면 그 제품의 공헌이익(광고비까지 뺀 금액)을 월별로 보여줍니다. 모든 채널 합산입니다.</p>
+  <div class="tabs" id="p-tabs" role="group" aria-label="제품 선택"></div>
+  <div class="pk" id="p-kpis"></div>
+  <div class="scroll"><svg id="pcm" viewBox="0 0 900 250" style="width:100%;min-width:560px;height:auto" role="img" aria-label="제품 월별 공헌이익"></svg></div>
  </section>
 
- <section class="panel">
-  <h2>제품별 공헌이익</h2>
-  <p class="hint">광고비까지 뺀 뒤 제품마다 남긴 금액입니다. 막대 색은 채널별 몫입니다.</p>
-  <div id="prod"></div>
-  <div class="legend" id="prod-legend"></div>
+ <div class="legend" id="prod-legend"></div>
  </section>
 
  <section class="panel">
@@ -296,36 +304,33 @@ function renderCm(){
  const top=niceMax(Math.max(...t.map(s=>s.contrib),...cost));const y=v=>T+(1-v/top)*(H-T-B);
  for(let i=0;i<=4;i++){const v=top*i/4;el('line',{x1:L,x2:W-R,y1:y(v),y2:y(v),class:'gl'},svg);txt(svg,L-6,y(v)+4,fmt(v),{'text-anchor':'end'});}
  el('line',{x1:L,x2:W-R,y1:y(0),y2:y(0),stroke:'var(--line2)'},svg);
- const bw=(W-L-R)/8,w=bw*.34;
- t.forEach((s,m)=>{
-  const g=el('g',{opacity:S.month!=='all'&&+S.month!==m?.3:1},svg);const x0=L+m*bw+bw*.15;
-  el('rect',{x:x0,y:y(s.contrib),width:w,height:Math.max(1,y(0)-y(s.contrib)),rx:3,fill:'var(--accent)'},g);
-  el('rect',{x:x0+w+2,y:y(cost[m]),width:w,height:Math.max(1,y(0)-y(cost[m])),rx:3,fill:'var(--red)',opacity:.75},g);
-  const gap=s.contrib-cost[m];
-  txt(g,x0+w+1,y(Math.max(s.contrib,cost[m]))-7,fmt(gap),{'text-anchor':'middle',class:'val','font-size':10,fill:gap<0?'var(--red)':'var(--green)'});
-  txt(svg,x0+w+1,H-B+16,MONTHS[m],{'text-anchor':'middle'});
-  const hit=el('rect',{x:L+m*bw,y:T,width:bw,height:H-T-B,fill:'transparent'},svg);
-  hover(hit,()=>`<b>${MONTHS[m]}</b><br>${sw('var(--accent)')}공헌이익 <span class="num">${won(s.contrib)}</span><br>${sw('var(--red)')}고정비+변동비 <span class="num">${won(cost[m])}</span><br>차이 <span class="num">${won(gap)}</span>`);
+ const bw=(W-L-R)/8,cx=m=>L+m*bw+bw/2;
+ t.forEach((s,m)=>{const dim=S.month!=='all'&&+S.month!==m;el('rect',{x:cx(m)-bw*.3,y:y(cost[m]),width:bw*.6,height:Math.max(1,y(0)-y(cost[m])),rx:3,fill:'var(--red)',opacity:dim?.15:.45},svg);txt(svg,cx(m),H-B+16,MONTHS[m],{'text-anchor':'middle'});});
+ el('polyline',{points:t.map((s,m)=>`${cx(m)},${y(s.contrib)}`).join(' '),fill:'none',stroke:'var(--accent)','stroke-width':2.5,'stroke-linejoin':'round'},svg);
+ t.forEach((s,m)=>{const dim=S.month!=='all'&&+S.month!==m;
+  el('circle',{cx:cx(m),cy:y(s.contrib),r:4.5,fill:'var(--accent)',stroke:'var(--surface)','stroke-width':2,opacity:dim?.4:1},svg);
+  const above=s.contrib>=cost[m]||y(cost[m])-y(s.contrib)>-16;
+  txt(svg,cx(m),y(s.contrib)-10,fmt(s.contrib),{'text-anchor':'middle',class:'val','font-size':10,'font-weight':600,opacity:dim?.4:1});
  });
+ t.forEach((s,m)=>{const hit=el('rect',{x:L+m*bw,y:T,width:bw,height:H-T-B,fill:'transparent'},svg);
+  hover(hit,()=>`<b>${MONTHS[m]}</b><br>${sw('var(--accent)')}공헌이익 <span class="num">${won(s.contrib)}</span><br>${sw('var(--red)')}고정비+변동비 <span class="num">${won(cost[m])}</span><br>차이 <span class="num">${won(s.contrib-cost[m])}</span>`);});
 }
 function renderOp(){
  const t=ALL.map(m=>totals([m]));
  monthBars('op',900,250,t.map(s=>({v:s.op,s})),{tip:(d,m)=>`<b>${MONTHS[m]}</b><br>영업이익 <span class="num">${won(d.s.op)}</span><br>영업이익률 ${pct(d.s.op/d.s.sales)}<br>공헌이익 ${fmt(d.s.contrib)} − 고정비 ${fmt(d.s.fixed)} − 변동비 ${fmt(d.s.variable)}`});
 }
 
+const PROD_ORDER=['PH','DWPRO','MK','MC','DWPLUS','ETC'];
+S.prod='PH';
 function renderProd(){
- const pm=period();const tot=sum(pick({months:pm})).contrib;
- const rows=PRODUCTS.map(p=>{const s=sum(pick({months:pm,prod:p.id}));const byCh=CHANNELS.map(c=>sum(pick({months:pm,prod:p.id,ch:c.id})).contrib);return {p,s,byCh};}).sort((a,b)=>b.s.contrib-a.s.contrib);
- const mx=Math.max(...rows.map(r=>Math.max(r.s.contrib,r.byCh.reduce((a,v)=>a+Math.max(0,v),0))),1);
- let h='<div class="prow head"><span>제품</span><span>공헌이익</span><span class="r">이익률</span><span class="r share">비중</span></div>';
- rows.forEach((r,i)=>{
-  const w=Math.max(0,r.s.contrib)/mx*100;const pos=r.byCh.map(v=>Math.max(0,v));const ps=pos.reduce((a,b)=>a+b,0)||1;
-  const segs=r.s.contrib>0?pos.map((v,ci)=>`<span style="width:${v/ps*100}%;background:${CH_COLOR[CHANNELS[ci].id]};${ci<2?'border-right:2px solid var(--surface)':''}"></span>`).join(''):'';
-  h+=`<div class="prow" data-i="${i}"><span>${r.p.name}</span><div class="track"><div class="fill" style="width:${w}%">${segs}</div><span class="amt" style="left:${Math.min(w,78)}%;${r.s.contrib<0?'color:var(--red)':''}">${fmt(r.s.contrib)}</span></div><span class="r">${pct(r.s.contrib/r.s.sales)}</span><span class="r share">${pct(r.s.contrib/tot)}</span></div>`;
- });
- $('prod').innerHTML=h;
- $('prod').querySelectorAll('.prow[data-i]').forEach(d=>{const r=rows[+d.dataset.i];hover(d,()=>`<b>${r.p.name}</b> 공헌이익 <span class="num">${fmt(r.s.contrib)}</span><br>매출 <span class="num">${fmt(r.s.sales)}</span><br>`+CHANNELS.map((c,ci)=>`${sw(CH_COLOR[c.id])}${c.name} <span class="num">${fmt(r.byCh[ci])}</span>`).join('<br>'));});
- $('prod-legend').innerHTML=CHANNELS.map(c=>`<span><i style="background:${CH_COLOR[c.id]}"></i>${c.name}</span>`).join('');
+ const tabs=$('p-tabs');
+ tabs.innerHTML=PROD_ORDER.map(id=>`<button class="pbtn" data-p="${id}" aria-pressed="${id===S.prod}">${PRODUCTS.find(p=>p.id===id).name}</button>`).join('');
+ tabs.querySelectorAll('button').forEach(b=>b.onclick=()=>{S.prod=b.dataset.p;renderProd();});
+ const pm=period();const s=sum(pick({months:pm,prod:S.prod}));const all=sum(pick({months:pm})).contrib;
+ $('p-kpis').innerHTML=[['매출',fmt(s.sales)],['공헌이익',fmt(s.contrib)],['공헌이익률',pct(s.contrib/s.sales)],['전체 공헌이익 중',pct(s.contrib/all)]].map(([l,v])=>`<div><span class="l">${l}</span><span class="v num">${v}</span></div>`).join('');
+ const vals=ALL.map(m=>{const x=sum(pick({months:[m],prod:S.prod}));return {v:x.contrib,s:x,ch:CHANNELS.map(c=>sum(pick({months:[m],prod:S.prod,ch:c.id})).contrib)};});
+ const name=PRODUCTS.find(p=>p.id===S.prod).name;
+ monthBars('pcm',900,250,vals,{tip:(d,m)=>`<b>${name} · ${MONTHS[m]}</b><br>공헌이익 <span class="num">${won(d.v)}</span> (${pct(d.v/d.s.sales)})<br>매출 <span class="num">${fmt(d.s.sales)}</span> · 광고비 <span class="num">${fmt(d.s.ads)}</span><br>`+CHANNELS.map((c,ci)=>`${sw(CH_COLOR[c.id])}${c.name} <span class="num">${fmt(d.ch[ci])}</span>`).join('<br>')});
 }
 
 function renderAdr(){
