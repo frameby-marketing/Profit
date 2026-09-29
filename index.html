@@ -3,99 +3,95 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <title>영업이익 대시보드</title>
+<script>(function(){try{var t=localStorage.getItem('theme');if(t!=='light'&&t!=='dark'){var l=localStorage.getItem('rmv2_theme');t=(l==='light'||l==='dark')?l:'dark';}document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
 <style>
-/* Layout: 요약 → 폭포 → 월별 → 제품×채널 → 제품 상세 → 채널 구조 → 월별 손익표, 단일 컬럼 흐름 + 2열 구간 */
+/* Layout: 상단 기간 필터 → KPI → 진단 → 폭포 → 월별(매출·공헌이익 / 영업이익) → 제품별 공헌이익 → 제품별 개당 수익 → 손익표 → 계산 기준 */
+/* 색상: 현금수지 대시보드와 동일 (라이트 = html.light 값, 다크 = 기본값) */
 :root{
- --bg:#f6f7f6;--surface:#ffffff;--fg:#121614;--fg2:#4d5550;--muted:#7f8782;--line:#e2e6e3;--grid:#eef1ef;
- --accent:#1c5cab;--accent-soft:#e6eef8;
- --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;
- --pos:#2a78d6;--neg:#e34948;--neutral:#c9cec9;
- --n1:#3a403c;--n2:#6b726d;--n3:#9aa19c;--n4:#bfc5c1;--n5:#dde1de;
- --good:#0ca30c;--warn:#fab219;--crit:#d03b3b;
- --h0:#eef4fc;--h1:#cde2fb;--h2:#9ec5f4;--h3:#6da7ec;--h4:#3987e5;--h5:#1c5cab;--h6:#0d366b;
- --sans:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
- --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+ --bg:#f4f6fa;--surface:#ffffff;--surface2:#eef1f7;--line:#d4d8e8;--line2:#c5cbdc;
+ --fg:#1a1d2e;--fg2:#4b5270;--muted:#9299b0;
+ --green:#16a34a;--green-dim:#dcfce7;--red:#dc2626;--red-dim:#fee2e2;--blue:#2563eb;--blue-dim:#dbeafe;--yellow:#d97706;--accent:#4f46e5;
+ --grid:#e8ebf3;--cost:#b3b9cc;
+ --sans:"Pretendard","IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+ --mono:"DM Mono",ui-monospace,Menlo,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
- --bg:#121413;--surface:#1b1e1c;--fg:#f1f3f1;--fg2:#c0c6c2;--muted:#8d948f;--line:#2e3330;--grid:#262a27;
- --accent:#6da7ec;--accent-soft:#1d2a3b;
- --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;
- --pos:#3987e5;--neg:#e66767;--neutral:#4a4f4b;
- --n1:#e2e6e3;--n2:#aab1ac;--n3:#7c837e;--n4:#575d59;--n5:#3a3f3c;
- --h0:#1d2530;--h1:#184f95;--h2:#1c5cab;--h3:#256abf;--h4:#3987e5;--h5:#6da7ec;--h6:#b7d3f6;
- color-scheme:dark}}
+ --bg:#0f1117;--surface:#181b23;--surface2:#1e2130;--line:#2a2d3a;--line2:#363950;
+ --fg:#e8eaf0;--fg2:#9ca3b0;--muted:#5a6070;
+ --green:#22c55e;--green-dim:#166534;--red:#ef4444;--red-dim:#7f1d1d;--blue:#3b82f6;--blue-dim:#1e3a5f;--yellow:#f59e0b;--accent:#6366f1;
+ --grid:#22252f;--cost:#4a5066;color-scheme:dark}}
 :root[data-theme="dark"]{
- --bg:#121413;--surface:#1b1e1c;--fg:#f1f3f1;--fg2:#c0c6c2;--muted:#8d948f;--line:#2e3330;--grid:#262a27;
- --accent:#6da7ec;--accent-soft:#1d2a3b;
- --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;
- --pos:#3987e5;--neg:#e66767;--neutral:#4a4f4b;
- --n1:#e2e6e3;--n2:#aab1ac;--n3:#7c837e;--n4:#575d59;--n5:#3a3f3c;
- --h0:#1d2530;--h1:#184f95;--h2:#1c5cab;--h3:#256abf;--h4:#3987e5;--h5:#6da7ec;--h6:#b7d3f6;
- color-scheme:dark}
+ --bg:#0f1117;--surface:#181b23;--surface2:#1e2130;--line:#2a2d3a;--line2:#363950;
+ --fg:#e8eaf0;--fg2:#9ca3b0;--muted:#5a6070;
+ --green:#22c55e;--green-dim:#166534;--red:#ef4444;--red-dim:#7f1d1d;--blue:#3b82f6;--blue-dim:#1e3a5f;--yellow:#f59e0b;--accent:#6366f1;
+ --grid:#22252f;--cost:#4a5066;color-scheme:dark}
 *{box-sizing:border-box}
 body{margin:0}
 body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:14px;line-height:1.5}
-.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:24px 56px;display:flex;flex-direction:column;gap:20px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:24px 56px;display:flex;flex-direction:column;gap:18px}
 .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
-header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
-h1{font-size:24px;font-weight:700;margin:0;letter-spacing:-.01em;text-wrap:balance}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px}
+h1{font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em;text-wrap:balance}
 .sub{color:var(--fg2);margin:4px 0 0;font-size:13px}
-.badge{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.04em;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent);margin-left:8px;vertical-align:middle}
+.theme-toggle{display:flex;align-items:center;gap:2px;background:var(--surface2);border:1px solid var(--line);border-radius:20px;padding:3px;flex-shrink:0}
+.theme-btn{padding:5px 14px;border-radius:16px;border:none;background:none;color:var(--muted);font:inherit;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px}
+.theme-btn:hover{color:var(--fg)}
+.theme-btn[aria-pressed="true"]{background:var(--accent);color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .filters{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;border-bottom:1px solid var(--line)}
-.fgroup{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.flabel{font-size:11px;color:var(--muted);letter-spacing:.06em;margin-right:2px}
-select,button.chip{font:inherit;font-size:13px;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer}
-button.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.fgroup{display:flex;align-items:center;gap:8px}
+.flabel{font-size:12px;color:var(--muted)}
+select{font:inherit;font-size:13px;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 10px;cursor:pointer}
 select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
-.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0}
 .kpi .l{font-size:12px;color:var(--fg2)}
-.kpi .v{font-size:24px;font-weight:600;letter-spacing:-.02em}
+.kpi .v{font-size:24px;font-weight:500;letter-spacing:-.02em}
+.kpi .v.neg{color:var(--red)} .kpi .v.pos{color:var(--green)}
 .kpi .d{font-size:12px;color:var(--muted)}
-.kpi .d .up{color:var(--good)} .kpi .d .dn{color:var(--crit)}
-.kpi.hero{background:var(--fg);color:var(--bg);border-color:var(--fg)}
-.kpi.hero .l,.kpi.hero .d{color:inherit;opacity:.75}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 18px 16px;min-width:0}
+.kpi .d .up{color:var(--green)} .kpi .d .dn{color:var(--red)}
+.kpi.hero{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 18px 16px;min-width:0}
 .panel h2{font-size:15px;font-weight:600;margin:0}
 .panel .hint{color:var(--muted);font-size:12px;margin:2px 0 12px}
-.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
 .scroll{overflow-x:auto}
 svg text{fill:var(--fg2);font-family:var(--sans);font-size:11px}
 svg .val{fill:var(--fg);font-family:var(--mono);font-size:11px}
 svg .gl{stroke:var(--grid);stroke-width:1}
-svg .base{stroke:var(--line);stroke-width:1}
 .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--fg2);margin-top:8px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 table{border-collapse:collapse;width:100%;font-size:13px}
 th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
 th:first-child,td:first-child{text-align:left}
-thead th{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.04em}
-tr.total td{font-weight:600;border-top:1px solid var(--fg2)}
+thead th{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.02em;background:var(--surface2)}
+tr.total td{font-weight:600;border-top:1px solid var(--line2);background:var(--surface2)}
 tr.sub td{color:var(--fg2)}
-.heat td.cell{text-align:center;font-family:var(--mono);font-variant-numeric:tabular-nums;border:2px solid var(--surface);border-radius:6px;cursor:default}
-.heat th{text-align:center}
-.pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;font-family:var(--sans)}
-.pill.ok{background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--fg)}
-.pill.bad{background:color-mix(in srgb,var(--crit) 18%,transparent);color:var(--fg)}
-.pill.na{background:var(--grid);color:var(--muted)}
-.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+td.neg{color:var(--red)}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px}
+.pill.ok{background:var(--green-dim);color:var(--green)}
+.pill.bad{background:var(--red-dim);color:var(--red)}
+.pill.na{background:var(--surface2);color:var(--muted)}
 .note{font-size:12px;color:var(--muted);margin-top:10px}
 .note b{color:var(--fg2);font-weight:600}
-#tip{position:fixed;pointer-events:none;background:var(--fg);color:var(--bg);font-size:12px;padding:6px 9px;border-radius:6px;z-index:20;white-space:nowrap;line-height:1.45}
-#tip .num{font-size:12px}
-.bar-hit{cursor:default}
-@media (max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi.hero{grid-column:span 2}.grid2{grid-template-columns:minmax(0,1fr)}}
-@media (max-width:420px){.wrap{padding-inline:16px}.kpi .v{font-size:20px}}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
-
-.assume{margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px;color:var(--fg2);font-size:13px;max-width:80ch}
+.assume{margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px;color:var(--fg2);font-size:13px;max-width:85ch}
 .assume b{color:var(--fg);font-weight:600}
-:root{--ht:#121614;--hti:#ffffff}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ht:#f1f3f1;--hti:#0b0b0b}}
-:root[data-theme="dark"]{--ht:#f1f3f1;--hti:#0b0b0b}
+.prow{display:grid;grid-template-columns:120px minmax(0,1fr) 88px 68px;gap:12px;align-items:center;padding-block:7px;border-bottom:1px solid var(--line)}
+.prow.head{font-size:11px;color:var(--muted);padding-block:4px}
+.prow .track{position:relative;height:22px;background:var(--surface2);border-radius:4px}
+.prow .fill{position:absolute;left:0;top:0;bottom:0;border-radius:4px;display:flex}
+.prow .fill span{height:100%}
+.prow .amt{position:absolute;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:12px;color:var(--fg);padding-left:8px;white-space:nowrap}
+.prow .r{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:12px;color:var(--fg2)}
+.prow.adr{grid-template-columns:120px minmax(0,1fr) 72px 68px}
+.prow.tot{border-bottom:none;font-weight:600}
+#tip{position:fixed;pointer-events:none;background:var(--surface2);color:var(--fg);border:1px solid var(--line2);font-size:12px;padding:7px 10px;border-radius:6px;z-index:20;white-space:nowrap;line-height:1.5;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+@media (max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi.hero{grid-column:span 2}.grid2{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:560px){.prow,.prow.adr{grid-template-columns:84px minmax(0,1fr) 60px}.prow .share{display:none}}
+@media (max-width:420px){.wrap{padding-inline:16px}.kpi .v{font-size:20px}}
 </style>
 </head>
 <body>
@@ -103,18 +99,19 @@ tr.sub td{color:var(--fg2)}
  <header class="top">
   <div>
    <h1>영업이익 대시보드</h1>
-   <p class="sub">2026년 1~8월 · B2B 제외 · 부가세 포함 · 쿠팡은 발주·입고 기준 공급가</p>
+   <p class="sub">2026년 1~8월 · B2B 제외 · 부가세 포함 · 쿠팡·M몰은 공급가 기준</p>
+  </div>
+  <div class="theme-toggle" role="group" aria-label="화면 모드">
+   <button class="theme-btn" data-mode="light">☀️ 일반모드</button>
+   <button class="theme-btn" data-mode="dark">🌙 다크모드</button>
   </div>
  </header>
 
- <div class="filters" role="toolbar" aria-label="필터">
-  <div class="fgroup"><span class="flabel">기간</span>
-   <select id="f-month" aria-label="기간"></select></div>
-  <div class="fgroup" id="f-ch"><span class="flabel">채널</span></div>
+ <div class="filters">
+  <div class="fgroup"><span class="flabel">기간</span><select id="f-month" aria-label="기간"></select></div>
  </div>
 
  <section class="kpis" id="kpis" aria-label="요약"></section>
-
 
  <section class="panel">
   <h2>진단 요약 (1~8월)</h2>
@@ -123,51 +120,55 @@ tr.sub td{color:var(--fg2)}
    <li><b>고정비를 못 덮습니다.</b> 월평균 공헌이익 약 4,300만 원, 고정비+변동비 약 7,600만 원으로 매달 3,000만 원 이상 부족합니다.</li>
    <li><b>매출이 줄고 있습니다.</b> 1월 2.07억 → 7~8월 약 1억. 공헌이익률도 30~32%에서 25~28%로 내려왔습니다. 고정비는 7,800만 → 4,300만 원으로 줄어 8월 적자가 가장 작습니다.</li>
    <li><b>8월 기준 흑자 조건</b>: 고정비 그대로면 월매출 약 1.55억, 매출 그대로면 고정비 월 약 2,900만 원 이하.</li>
-   <li><b>볼 곳</b>: 자사몰·네이버 광고 효율(이익률 26%로 가장 낮음), 광고 부담이 적은 M몰·쿠팡 확대, PH스탠드 2.0 원가 51% 상승(판매가 동일).</li>
-   <li><b>확인 필요</b>: 4월 고정비 8,900만 원에 발주 대금이나 일회성 비용이 섞여 있지 않은지.</li>
   </ul>
  </section>
+
  <section class="panel">
   <h2>매출에서 영업이익까지</h2>
-  <p class="hint" id="wf-hint">어떤 비용이 이익을 가장 많이 가져가는지 보여줍니다.</p>
+  <p class="hint">어떤 비용이 이익을 가장 많이 가져가는지 보여줍니다. 막대 아래 %는 매출 대비 비율입니다.</p>
   <div class="scroll"><svg id="wf" viewBox="0 0 900 300" style="width:100%;min-width:640px;height:auto" role="img" aria-label="손익 폭포 차트"></svg></div>
  </section>
 
  <div class="grid2">
   <section class="panel">
-   <h2>월별 매출 (채널별)</h2>
-   <p class="hint">쿠팡은 발주 시점 기준이라 달마다 들쭉날쭉할 수 있습니다.</p>
+   <h2>월별 매출</h2>
+   <p class="hint">채널별로 쌓았습니다. 쿠팡은 발주 시점 기준이라 달마다 들쭉날쭉할 수 있습니다.</p>
    <div class="scroll"><svg id="rev" viewBox="0 0 520 250" style="width:100%;min-width:420px;height:auto" role="img" aria-label="월별 채널별 매출"></svg></div>
    <div class="legend" id="rev-legend"></div>
   </section>
   <section class="panel">
-   <h2 id="op-title">월별 영업이익</h2>
-   <p class="hint" id="op-hint">막대 위 숫자는 영업이익률입니다.</p>
-   <div class="scroll"><svg id="op" viewBox="0 0 520 250" style="width:100%;min-width:420px;height:auto" role="img" aria-label="월별 영업이익"></svg></div>
+   <h2>월별 공헌이익</h2>
+   <p class="hint">광고비까지 뺀 금액입니다. 이 금액으로 고정비를 덮어야 합니다. 점선은 그 달 고정비+변동비입니다.</p>
+   <div class="scroll"><svg id="cm" viewBox="0 0 520 250" style="width:100%;min-width:420px;height:auto" role="img" aria-label="월별 공헌이익"></svg></div>
+   <div class="legend"><span><i style="background:var(--accent)"></i>공헌이익</span><span><i style="background:none;border-top:2px dashed var(--red);border-radius:0;height:0;width:14px"></i>고정비+변동비</span></div>
   </section>
  </div>
 
  <section class="panel">
-  <h2>제품 × 채널 공헌이익률</h2>
-  <p class="hint">광고비까지 뺀 뒤 매출 대비 남는 비율입니다. 진할수록 잘 버는 칸이고, <b style="color:var(--crit)">●</b>는 15% 미만입니다. 고정비는 빼기 전입니다.</p>
-  <div class="scroll"><table class="heat" id="heat"></table></div>
+  <h2>월별 영업이익</h2>
+  <p class="hint">공헌이익에서 고정비와 변동비를 뺀 금액입니다. 막대에 마우스를 올리면 영업이익률이 보입니다.</p>
+  <div class="scroll"><svg id="op" viewBox="0 0 900 250" style="width:100%;min-width:560px;height:auto" role="img" aria-label="월별 영업이익"></svg></div>
+ </section>
+
+ <section class="panel">
+  <h2>제품별 공헌이익</h2>
+  <p class="hint">광고비까지 뺀 뒤 제품마다 남긴 금액입니다. 막대 색은 채널별 몫입니다.</p>
+  <div id="prod"></div>
+  <div class="legend" id="prod-legend"></div>
+ </section>
+
+ <section class="panel">
+  <h2>제품별 매출 대비 광고비</h2>
+  <p class="hint">모든 채널 합산입니다. 매출은 자사몰·네이버·쿠팡·M몰에 자사몰·네이버 배송비 수입까지 포함했고, 광고비는 자사몰(META·구글·카카오)·네이버·쿠팡 광고를 모두 더했습니다.</p>
+  <div id="adr"></div>
+  <div class="legend"><span><i style="background:var(--blue-dim);border:1px solid var(--blue)"></i>매출 (배송비 수입 포함)</span><span><i style="background:var(--yellow)"></i>광고비</span></div>
  </section>
 
  <section class="panel">
   <h2>제품별 개당 수익 구조</h2>
-  <p class="hint">한 개 팔 때 채널별로 얼마 남는지, 광고 효율이 손익분기를 넘는지 봅니다.</p>
-  <div class="tabs" id="p-tabs"></div>
+  <p class="hint">모든 채널을 합쳐 한 개 팔 때 얼마 남는지 봅니다.</p>
   <div class="scroll"><table id="unit"></table></div>
-  <p class="note"><b>손익분기 ROAS</b>: 광고비 1원당 이만큼 이상 팔아야 광고를 해도 손해가 아닙니다. ROAS는 모두 우리 매출 기준이라 쿠팡은 공급가로 계산됩니다.</p>
-  <p class="note" id="unit-note" hidden><b>맥세이프케이스</b>는 개당 원가를 받지 못해 임시로 매출의 35%를 원가로 잡았습니다.</p>
- </section>
-
- <section class="panel">
-  <h2>채널별 비용 구조</h2>
-  <p class="hint">매출(배송비 수입 포함)을 100으로 놓고 비용과 공헌이익이 차지하는 비율입니다.</p>
-  <div id="mix"></div>
-  <div class="legend" id="mix-legend"></div>
-  <p class="note">쿠팡과 M몰은 공급가 기준 매출이라 수수료가 이미 빠져 있어 수수료 칸이 없습니다.</p>
+  <p class="note"><b>손익분기 ROAS</b>: 광고비 1원당 이만큼 이상 팔아야 광고를 해도 손해가 아닙니다. ROAS는 우리 매출 기준이라 쿠팡·M몰은 공급가로 계산됩니다.</p>
  </section>
 
  <section class="panel">
@@ -182,9 +183,10 @@ tr.sub td{color:var(--fg2)}
    <li><b>맥세이프케이스</b> = 맥세이프 에어 + 맥세이프 에어범퍼. 개당 원가가 없어 임시로 매출의 35%를 원가로 잡았습니다.</li>
    <li><b>기타</b>는 매출의 35%를 원가로 봅니다. 포장비도 여기에 포함된 것으로 봅니다.</li>
    <li><b>PH스탠드</b>는 8월부터 2.0 원가(17,687원), 그 전은 1.0 원가(11,704원)입니다.</li>
-   <li><b>쿠팡</b>은 포장부자재·크라프트지 없이 제품 원가만 뺍니다.</li>
-   <li><b>자사몰·네이버</b>는 소비자가 기준 매출이라 수수료 5%를 뺍니다. <b>M몰·쿠팡</b>은 공급가 기준이라 수수료가 이미 빠져 있습니다.</li>
-   <li><b>배송</b>: 판매수량 1개 = 주문 1건. 액정보호필름, 프레임팁, 스탠드케이스는 다른 제품과 함께 나가는 부속으로 보고 배송 건수에서 뺐습니다.</li>
+   <li><b>자사몰·네이버</b>는 소비자가 매출에서 수수료 5%를 빼고, 배송비 수입(3,000원, DW 4,000원)을 더하고 배송 원가 2,150원을 뺍니다.</li>
+   <li><b>M몰</b>은 공급가(수수료 차감 후) 매출이며, 무료배송이라 배송비 수입 없이 배송 원가 2,150원만 뺍니다.</li>
+   <li><b>쿠팡</b>은 공급가 매출이며, 쿠팡이 사입해 가므로 포장비와 배송 원가가 없습니다.</li>
+   <li><b>배송 건수</b>: 판매수량 1개 = 주문 1건. 액정보호필름, 프레임팁, 스탠드케이스는 부속으로 보고 배송 건수에서 뺐습니다.</li>
    <li><b>광고</b>: META·구글·카카오·네이버 SA·GFA는 자사몰·네이버, 쿠팡 광고는 쿠팡에 배분했습니다. 1월 광고비는 제품별 금액의 합(52,554,564원)을 씁니다.</li>
    <li><b>고정비·변동비</b>는 주신 월별 금액 그대로이며, 6월 변동비는 빈칸이라 0원으로 봤습니다.</li>
   </ul>
@@ -192,226 +194,168 @@ tr.sub td{color:var(--fg2)}
 </div>
 <div id="tip" hidden></div>
 <script>
-// ===== DATA (1~8월 실제, 부가세 포함) =====
 const DATA={"cells":[{"m":7,"c":"direct","p":"PH","units":534,"orders":534,"rev":29337074,"shipInc":1602000,"cogs":8909256,"pack":535602,"fee":1466854,"shipCost":1148100,"ads":8760505},{"m":7,"c":"direct","p":"DWPRO","units":139,"orders":139,"rev":13149418,"shipInc":556000,"cogs":4840675,"pack":108281,"fee":657471,"shipCost":298850,"ads":4531493},{"m":7,"c":"mmall","p":"DWPRO","units":21,"orders":21,"rev":1386063,"shipInc":0,"cogs":731325,"pack":16359,"fee":0,"shipCost":45150,"ads":0},{"m":7,"c":"cp","p":"DWPRO","units":102,"orders":0,"rev":6869700,"shipInc":0,"cogs":3552150,"pack":0,"fee":0,"shipCost":0,"ads":1591284},{"m":7,"c":"direct","p":"MK","units":620,"orders":620,"rev":15466247,"shipInc":1860000,"cogs":5193740,"pack":424080,"fee":773312,"shipCost":1333000,"ads":6913066},{"m":7,"c":"mmall","p":"MK","units":114,"orders":114,"rev":3225972,"shipInc":0,"cogs":954978,"pack":77976,"fee":0,"shipCost":245100,"ads":0},{"m":7,"c":"cp","p":"MK","units":30,"orders":0,"rev":657300,"shipInc":0,"cogs":251310,"pack":0,"fee":0,"shipCost":0,"ads":152256},{"m":7,"c":"direct","p":"DWPLUS","units":198,"orders":198,"rev":9785214,"shipInc":792000,"cogs":4626468,"pack":154242,"fee":489261,"shipCost":425700,"ads":4194879},{"m":7,"c":"mmall","p":"DWPLUS","units":9,"orders":9,"rev":395577,"shipInc":0,"cogs":210294,"pack":7011,"fee":0,"shipCost":19350,"ads":0},{"m":7,"c":"cp","p":"DWPLUS","units":80,"orders":0,"rev":3588000,"shipInc":0,"cogs":1869280,"pack":0,"fee":0,"shipCost":0,"ads":831117},{"m":7,"c":"direct","p":"ETC","units":522,"orders":456,"rev":6187614,"shipInc":1368000,"cogs":2165664,"pack":0,"fee":309381,"shipCost":980400,"ads":1433461},{"m":7,"c":"mmall","p":"ETC","units":75,"orders":75,"rev":1166407,"shipInc":0,"cogs":408242,"pack":0,"fee":0,"shipCost":161250,"ads":0},{"m":7,"c":"cp","p":"ETC","units":272,"orders":0,"rev":2312092,"shipInc":0,"cogs":809232,"pack":0,"fee":0,"shipCost":0,"ads":535568},{"m":7,"c":"direct","p":"MC","units":175,"orders":175,"rev":2705316,"shipInc":525000,"cogs":946861,"pack":0,"fee":135266,"shipCost":376250,"ads":185859},{"m":7,"c":"mmall","p":"MC","units":58,"orders":58,"rev":1379389,"shipInc":0,"cogs":482786,"pack":0,"fee":0,"shipCost":124700,"ads":0},{"m":7,"c":"cp","p":"MC","units":40,"orders":0,"rev":711200,"shipInc":0,"cogs":248920,"pack":0,"fee":0,"shipCost":0,"ads":164741},{"m":6,"c":"direct","p":"DWPRO","units":132,"orders":132,"rev":12534000,"shipInc":528000,"cogs":4596900,"pack":102828,"fee":626700,"shipCost":283800,"ads":5167097},{"m":6,"c":"mmall","p":"DWPRO","units":32,"orders":32,"rev":2112096,"shipInc":0,"cogs":1114400,"pack":24928,"fee":0,"shipCost":68800,"ads":0},{"m":6,"c":"cp","p":"DWPRO","units":148,"orders":0,"rev":9967800,"shipInc":0,"cogs":5154100,"pack":0,"fee":0,"shipCost":0,"ads":2941992},{"m":6,"c":"direct","p":"MK","units":781,"orders":781,"rev":19444803,"shipInc":2343000,"cogs":6542437,"pack":534204,"fee":972240,"shipCost":1679150,"ads":7619670},{"m":6,"c":"mmall","p":"MK","units":94,"orders":94,"rev":2660012,"shipInc":0,"cogs":787438,"pack":64296,"fee":0,"shipCost":202100,"ads":0},{"m":6,"c":"direct","p":"PH","units":318,"orders":318,"rev":13384300,"shipInc":954000,"cogs":3504360,"pack":217512,"fee":669215,"shipCost":683700,"ads":5609649},{"m":6,"c":"mmall","p":"PH","units":8,"orders":8,"rev":226384,"shipInc":0,"cogs":88160,"pack":5472,"fee":0,"shipCost":17200,"ads":0},{"m":6,"c":"direct","p":"DWPLUS","units":156,"orders":156,"rev":8804333,"shipInc":624000,"cogs":3645096,"pack":121524,"fee":440217,"shipCost":335400,"ads":4158967},{"m":6,"c":"cp","p":"DWPLUS","units":40,"orders":0,"rev":1794000,"shipInc":0,"cogs":934640,"pack":0,"fee":0,"shipCost":0,"ads":0},{"m":6,"c":"direct","p":"ETC","units":1398,"orders":535,"rev":7169447,"shipInc":1605000,"cogs":2509307,"pack":0,"fee":358472,"shipCost":1150250,"ads":1905369},{"m":6,"c":"mmall","p":"ETC","units":188,"orders":175,"rev":2870912,"shipInc":0,"cogs":1004819,"pack":0,"fee":0,"shipCost":376250,"ads":0},{"m":6,"c":"cp","p":"ETC","units":302,"orders":0,"rev":2551636,"shipInc":0,"cogs":893073,"pack":0,"fee":0,"shipCost":0,"ads":1282613},{"m":6,"c":"direct","p":"MC","units":223,"orders":223,"rev":3507666,"shipInc":669000,"cogs":1227683,"pack":0,"fee":175383,"shipCost":479450,"ads":864942},{"m":6,"c":"mmall","p":"MC","units":67,"orders":67,"rev":1603456,"shipInc":0,"cogs":561210,"pack":0,"fee":0,"shipCost":144050,"ads":0},{"m":6,"c":"cp","p":"MC","units":18,"orders":0,"rev":320040,"shipInc":0,"cogs":112014,"pack":0,"fee":0,"shipCost":0,"ads":94460},{"m":5,"c":"direct","p":"PH","units":757,"orders":757,"rev":28494812,"shipInc":2271000,"cogs":8342140,"pack":517788,"fee":1424741,"shipCost":1627550,"ads":8867782},{"m":5,"c":"mmall","p":"PH","units":24,"orders":24,"rev":679152,"shipInc":0,"cogs":264480,"pack":16416,"fee":0,"shipCost":51600,"ads":0},{"m":5,"c":"cp","p":"PH","units":198,"orders":0,"rev":4781700,"shipInc":0,"cogs":2181960,"pack":0,"fee":0,"shipCost":0,"ads":1260623},{"m":5,"c":"direct","p":"MK","units":732,"orders":732,"rev":19034974,"shipInc":2196000,"cogs":6131964,"pack":500688,"fee":951748,"shipCost":1573800,"ads":7629797},{"m":5,"c":"mmall","p":"MK","units":125,"orders":125,"rev":3537250,"shipInc":0,"cogs":1047125,"pack":85500,"fee":0,"shipCost":268750,"ads":0},{"m":5,"c":"cp","p":"MK","units":57,"orders":0,"rev":1248870,"shipInc":0,"cogs":477489,"pack":0,"fee":0,"shipCost":0,"ads":329246},{"m":5,"c":"direct","p":"DWPRO","units":122,"orders":122,"rev":11543437,"shipInc":488000,"cogs":4248650,"pack":95038,"fee":577172,"shipCost":262300,"ads":5687343},{"m":5,"c":"mmall","p":"DWPRO","units":22,"orders":22,"rev":1452066,"shipInc":0,"cogs":766150,"pack":17138,"fee":0,"shipCost":47300,"ads":0},{"m":5,"c":"direct","p":"DWPLUS","units":94,"orders":94,"rev":5848397,"shipInc":376000,"cogs":2196404,"pack":73226,"fee":292420,"shipCost":202100,"ads":1875182},{"m":5,"c":"mmall","p":"DWPLUS","units":18,"orders":18,"rev":791154,"shipInc":0,"cogs":420588,"pack":14022,"fee":0,"shipCost":38700,"ads":0},{"m":5,"c":"cp","p":"DWPLUS","units":56,"orders":0,"rev":2511600,"shipInc":0,"cogs":1308496,"pack":0,"fee":0,"shipCost":0,"ads":662145},{"m":5,"c":"direct","p":"ETC","units":1492,"orders":537,"rev":8031505,"shipInc":1611000,"cogs":2811027,"pack":0,"fee":401576,"shipCost":1154550,"ads":2036938},{"m":5,"c":"mmall","p":"ETC","units":360,"orders":214,"rev":4747301,"shipInc":0,"cogs":1661555,"pack":0,"fee":0,"shipCost":460100,"ads":0},{"m":5,"c":"cp","p":"ETC","units":492,"orders":0,"rev":4096935,"shipInc":0,"cogs":1433927,"pack":0,"fee":0,"shipCost":0,"ads":1080095},{"m":5,"c":"direct","p":"MC","units":380,"orders":380,"rev":5353332,"shipInc":1140000,"cogs":1873666,"pack":0,"fee":267667,"shipCost":817000,"ads":1751506},{"m":5,"c":"mmall","p":"MC","units":131,"orders":131,"rev":2955578,"shipInc":0,"cogs":1034452,"pack":0,"fee":0,"shipCost":281650,"ads":0},{"m":5,"c":"cp","p":"MC","units":44,"orders":0,"rev":668205,"shipInc":0,"cogs":233872,"pack":0,"fee":0,"shipCost":0,"ads":176162},{"m":4,"c":"direct","p":"DWPRO","units":244,"orders":244,"rev":22206620,"shipInc":976000,"cogs":8497300,"pack":190076,"fee":1110331,"shipCost":524600,"ads":6381513},{"m":4,"c":"mmall","p":"DWPRO","units":24,"orders":24,"rev":1584072,"shipInc":0,"cogs":835800,"pack":18696,"fee":0,"shipCost":51600,"ads":0},{"m":4,"c":"cp","p":"DWPRO","units":191,"orders":0,"rev":12863850,"shipInc":0,"cogs":6651575,"pack":0,"fee":0,"shipCost":0,"ads":3063462},{"m":4,"c":"direct","p":"MK","units":857,"orders":857,"rev":22406985,"shipInc":2571000,"cogs":7179089,"pack":586188,"fee":1120349,"shipCost":1842550,"ads":7936621},{"m":4,"c":"mmall","p":"MK","units":129,"orders":129,"rev":3650442,"shipInc":0,"cogs":1080633,"pack":88236,"fee":0,"shipCost":277350,"ads":0},{"m":4,"c":"cp","p":"MK","units":96,"orders":0,"rev":2103360,"shipInc":0,"cogs":804192,"pack":0,"fee":0,"shipCost":0,"ads":500905},{"m":4,"c":"direct","p":"PH","units":493,"orders":493,"rev":18957540,"shipInc":1479000,"cogs":5432860,"pack":337212,"fee":947877,"shipCost":1059950,"ads":8709478},{"m":4,"c":"mmall","p":"PH","units":19,"orders":19,"rev":537662,"shipInc":0,"cogs":209380,"pack":12996,"fee":0,"shipCost":40850,"ads":0},{"m":4,"c":"cp","p":"PH","units":14,"orders":0,"rev":338100,"shipInc":0,"cogs":154280,"pack":0,"fee":0,"shipCost":0,"ads":80517},{"m":4,"c":"direct","p":"DWPLUS","units":106,"orders":106,"rev":6512958,"shipInc":424000,"cogs":2476796,"pack":82574,"fee":325648,"shipCost":227900,"ads":2428946},{"m":4,"c":"mmall","p":"DWPLUS","units":4,"orders":4,"rev":175812,"shipInc":0,"cogs":93464,"pack":3116,"fee":0,"shipCost":8600,"ads":0},{"m":4,"c":"cp","p":"DWPLUS","units":81,"orders":0,"rev":3632850,"shipInc":0,"cogs":1892646,"pack":0,"fee":0,"shipCost":0,"ads":865145},{"m":4,"c":"direct","p":"MC","units":588,"orders":588,"rev":8777259,"shipInc":1764000,"cogs":3072040,"pack":0,"fee":438863,"shipCost":1264200,"ads":3002771},{"m":4,"c":"mmall","p":"MC","units":134,"orders":134,"rev":3124592,"shipInc":0,"cogs":1093607,"pack":0,"fee":0,"shipCost":288100,"ads":0},{"m":4,"c":"cp","p":"MC","units":128,"orders":0,"rev":1949235,"shipInc":0,"cogs":682232,"pack":0,"fee":0,"shipCost":0,"ads":464201},{"m":4,"c":"direct","p":"ETC","units":1808,"orders":826,"rev":13902288,"shipInc":2478000,"cogs":4865801,"pack":0,"fee":695114,"shipCost":1775900,"ads":6488383},{"m":4,"c":"mmall","p":"ETC","units":412,"orders":213,"rev":5142417,"shipInc":0,"cogs":1799846,"pack":0,"fee":0,"shipCost":457950,"ads":0},{"m":4,"c":"cp","p":"ETC","units":402,"orders":0,"rev":3725485,"shipInc":0,"cogs":1303920,"pack":0,"fee":0,"shipCost":0,"ads":887206},{"m":3,"c":"direct","p":"DWPRO","units":232,"orders":232,"rev":21872123,"shipInc":928000,"cogs":8079400,"pack":180728,"fee":1093606,"shipCost":498800,"ads":6327784},{"m":3,"c":"mmall","p":"DWPRO","units":15,"orders":15,"rev":990045,"shipInc":0,"cogs":522375,"pack":11685,"fee":0,"shipCost":32250,"ads":0},{"m":3,"c":"cp","p":"DWPRO","units":184,"orders":0,"rev":12392400,"shipInc":0,"cogs":6407800,"pack":0,"fee":0,"shipCost":0,"ads":1567365},{"m":3,"c":"direct","p":"PH","units":685,"orders":685,"rev":27051441,"shipInc":2055000,"cogs":7548700,"pack":468540,"fee":1352572,"shipCost":1472750,"ads":9353866},{"m":3,"c":"mmall","p":"PH","units":15,"orders":15,"rev":424470,"shipInc":0,"cogs":165300,"pack":10260,"fee":0,"shipCost":32250,"ads":0},{"m":3,"c":"cp","p":"PH","units":273,"orders":0,"rev":6592950,"shipInc":0,"cogs":3008460,"pack":0,"fee":0,"shipCost":0,"ads":833862},{"m":3,"c":"direct","p":"MK","units":635,"orders":635,"rev":18422535,"shipInc":1905000,"cogs":5319395,"pack":434340,"fee":921127,"shipCost":1365250,"ads":7601205},{"m":3,"c":"mmall","p":"MK","units":113,"orders":113,"rev":3197674,"shipInc":0,"cogs":946601,"pack":77292,"fee":0,"shipCost":242950,"ads":0},{"m":3,"c":"cp","p":"MK","units":73,"orders":0,"rev":1599430,"shipInc":0,"cogs":611521,"pack":0,"fee":0,"shipCost":0,"ads":202293},{"m":3,"c":"direct","p":"DWPLUS","units":133,"orders":133,"rev":8596637,"shipInc":532000,"cogs":3107678,"pack":103607,"fee":429832,"shipCost":285950,"ads":2180562},{"m":3,"c":"mmall","p":"DWPLUS","units":17,"orders":17,"rev":747201,"shipInc":0,"cogs":397222,"pack":13243,"fee":0,"shipCost":36550,"ads":0},{"m":3,"c":"cp","p":"DWPLUS","units":164,"orders":0,"rev":7355400,"shipInc":0,"cogs":3832024,"pack":0,"fee":0,"shipCost":0,"ads":930296},{"m":3,"c":"direct","p":"MC","units":700,"orders":700,"rev":10266703,"shipInc":2100000,"cogs":3593346,"pack":0,"fee":513335,"shipCost":1505000,"ads":5661322},{"m":3,"c":"mmall","p":"MC","units":152,"orders":152,"rev":3531566,"shipInc":0,"cogs":1236048,"pack":0,"fee":0,"shipCost":326800,"ads":0},{"m":3,"c":"cp","p":"MC","units":308,"orders":0,"rev":4874185,"shipInc":0,"cogs":1705965,"pack":0,"fee":0,"shipCost":0,"ads":616477},{"m":3,"c":"direct","p":"ETC","units":1205,"orders":771,"rev":12867603,"shipInc":2313000,"cogs":4503661,"pack":0,"fee":643380,"shipCost":1657650,"ads":4549344},{"m":3,"c":"mmall","p":"ETC","units":454,"orders":229,"rev":5688271,"shipInc":0,"cogs":1990895,"pack":0,"fee":0,"shipCost":492350,"ads":0},{"m":3,"c":"cp","p":"ETC","units":518,"orders":0,"rev":4360225,"shipInc":0,"cogs":1526079,"pack":0,"fee":0,"shipCost":0,"ads":551472},{"m":2,"c":"direct","p":"PH","units":942,"orders":942,"rev":37038662,"shipInc":2826000,"cogs":10380840,"pack":644328,"fee":1851934,"shipCost":2025300,"ads":9865439},{"m":2,"c":"mmall","p":"PH","units":60,"orders":60,"rev":1697880,"shipInc":0,"cogs":661200,"pack":41040,"fee":0,"shipCost":129000,"ads":0},{"m":2,"c":"direct","p":"DWPRO","units":274,"orders":274,"rev":25704651,"shipInc":1096000,"cogs":9542050,"pack":213446,"fee":1285233,"shipCost":589100,"ads":5697571},{"m":2,"c":"mmall","p":"DWPRO","units":40,"orders":40,"rev":2640120,"shipInc":0,"cogs":1393000,"pack":31160,"fee":0,"shipCost":86000,"ads":0},{"m":2,"c":"cp","p":"DWPRO","units":72,"orders":0,"rev":4849200,"shipInc":0,"cogs":2507400,"pack":0,"fee":0,"shipCost":0,"ads":1607118},{"m":2,"c":"direct","p":"DWPLUS","units":190,"orders":190,"rev":12197000,"shipInc":760000,"cogs":4439540,"pack":148010,"fee":609850,"shipCost":408500,"ads":3040025},{"m":2,"c":"mmall","p":"DWPLUS","units":11,"orders":11,"rev":483483,"shipInc":0,"cogs":257026,"pack":8569,"fee":0,"shipCost":23650,"ads":0},{"m":2,"c":"cp","p":"DWPLUS","units":128,"orders":0,"rev":5740800,"shipInc":0,"cogs":2990848,"pack":0,"fee":0,"shipCost":0,"ads":1902611},{"m":2,"c":"direct","p":"ETC","units":2010,"orders":1279,"rev":24467128,"shipInc":3837000,"cogs":8563494,"pack":0,"fee":1223357,"shipCost":2749850,"ads":6753228},{"m":2,"c":"mmall","p":"ETC","units":531,"orders":289,"rev":6787823,"shipInc":0,"cogs":2375738,"pack":0,"fee":0,"shipCost":621350,"ads":0},{"m":2,"c":"cp","p":"ETC","units":640,"orders":0,"rev":5813290,"shipInc":0,"cogs":2034652,"pack":0,"fee":0,"shipCost":0,"ads":1926636},{"m":2,"c":"direct","p":"MC","units":797,"orders":797,"rev":12874502,"shipInc":2391000,"cogs":4506076,"pack":0,"fee":643725,"shipCost":1713550,"ads":8312786},{"m":2,"c":"mmall","p":"MC","units":91,"orders":91,"rev":2101498,"shipInc":0,"cogs":735524,"pack":0,"fee":0,"shipCost":195650,"ads":0},{"m":2,"c":"cp","p":"MC","units":252,"orders":0,"rev":3917855,"shipInc":0,"cogs":1371249,"pack":0,"fee":0,"shipCost":0,"ads":1298452},{"m":2,"c":"direct","p":"MK","units":236,"orders":236,"rev":6997236,"shipInc":708000,"cogs":1976972,"pack":161424,"fee":349862,"shipCost":507400,"ads":5299416},{"m":2,"c":"mmall","p":"MK","units":40,"orders":40,"rev":1131920,"shipInc":0,"cogs":335080,"pack":27360,"fee":0,"shipCost":86000,"ads":0},{"m":2,"c":"cp","p":"MK","units":53,"orders":0,"rev":1161230,"shipInc":0,"cogs":443981,"pack":0,"fee":0,"shipCost":0,"ads":384854},{"m":1,"c":"direct","p":"PH","units":750,"orders":750,"rev":28952453,"shipInc":2250000,"cogs":8265000,"pack":513000,"fee":1447623,"shipCost":1612500,"ads":8373859},{"m":1,"c":"mmall","p":"PH","units":24,"orders":24,"rev":679152,"shipInc":0,"cogs":264480,"pack":16416,"fee":0,"shipCost":51600,"ads":0},{"m":1,"c":"cp","p":"PH","units":224,"orders":0,"rev":5409600,"shipInc":0,"cogs":2468480,"pack":0,"fee":0,"shipCost":0,"ads":1221567},{"m":1,"c":"direct","p":"DWPRO","units":197,"orders":197,"rev":18298637,"shipInc":788000,"cogs":6860525,"pack":153463,"fee":914931,"shipCost":423550,"ads":5643494},{"m":1,"c":"mmall","p":"DWPRO","units":29,"orders":29,"rev":1914087,"shipInc":0,"cogs":1009925,"pack":22591,"fee":0,"shipCost":62350,"ads":0},{"m":1,"c":"cp","p":"DWPRO","units":180,"orders":0,"rev":12123000,"shipInc":0,"cogs":6268500,"pack":0,"fee":0,"shipCost":0,"ads":2737550},{"m":1,"c":"direct","p":"MK","units":502,"orders":502,"rev":14574012,"shipInc":1506000,"cogs":4205254,"pack":343368,"fee":728701,"shipCost":1079300,"ads":3811935},{"m":1,"c":"mmall","p":"MK","units":96,"orders":96,"rev":2716608,"shipInc":0,"cogs":804192,"pack":65664,"fee":0,"shipCost":206400,"ads":0},{"m":1,"c":"cp","p":"MK","units":37,"orders":0,"rev":810670,"shipInc":0,"cogs":309949,"pack":0,"fee":0,"shipCost":0,"ads":183061},{"m":1,"c":"direct","p":"DWPLUS","units":149,"orders":149,"rev":9507273,"shipInc":596000,"cogs":3481534,"pack":116071,"fee":475364,"shipCost":320350,"ads":1876390},{"m":1,"c":"mmall","p":"DWPLUS","units":25,"orders":25,"rev":1098825,"shipInc":0,"cogs":584150,"pack":19475,"fee":0,"shipCost":53750,"ads":0},{"m":1,"c":"cp","p":"DWPLUS","units":69,"orders":0,"rev":3094650,"shipInc":0,"cogs":1612254,"pack":0,"fee":0,"shipCost":0,"ads":698817},{"m":1,"c":"direct","p":"ETC","units":2270,"orders":1271,"rev":25120638,"shipInc":3813000,"cogs":8792223,"pack":0,"fee":1256032,"shipCost":2732650,"ads":10609363},{"m":1,"c":"mmall","p":"ETC","units":439,"orders":239,"rev":5712332,"shipInc":0,"cogs":1999316,"pack":0,"fee":0,"shipCost":513850,"ads":0},{"m":1,"c":"cp","p":"ETC","units":438,"orders":0,"rev":4386360,"shipInc":0,"cogs":1535226,"pack":0,"fee":0,"shipCost":0,"ads":938029},{"m":1,"c":"direct","p":"MC","units":433,"orders":433,"rev":8331286,"shipInc":1299000,"cogs":2915950,"pack":0,"fee":416564,"shipCost":930950,"ads":4278542},{"m":1,"c":"mmall","p":"MC","units":161,"orders":161,"rev":3635139,"shipInc":0,"cogs":1272299,"pack":0,"fee":0,"shipCost":346150,"ads":0},{"m":1,"c":"cp","p":"MC","units":157,"orders":0,"rev":2366480,"shipInc":0,"cogs":828268,"pack":0,"fee":0,"shipCost":0,"ads":586861},{"m":0,"c":"direct","p":"DWPRO","units":395,"orders":395,"rev":36253595,"shipInc":1580000,"cogs":13755875,"pack":307705,"fee":1812680,"shipCost":849250,"ads":11051588},{"m":0,"c":"mmall","p":"DWPRO","units":29,"orders":29,"rev":1914087,"shipInc":0,"cogs":1009925,"pack":22591,"fee":0,"shipCost":62350,"ads":0},{"m":0,"c":"cp","p":"DWPRO","units":183,"orders":0,"rev":12325050,"shipInc":0,"cogs":6372975,"pack":0,"fee":0,"shipCost":0,"ads":2723882},{"m":0,"c":"direct","p":"PH","units":796,"orders":796,"rev":28376181,"shipInc":2388000,"cogs":8771920,"pack":544464,"fee":1418809,"shipCost":1711400,"ads":9415254},{"m":0,"c":"mmall","p":"PH","units":46,"orders":46,"rev":1301708,"shipInc":0,"cogs":506920,"pack":31464,"fee":0,"shipCost":98900,"ads":0},{"m":0,"c":"cp","p":"PH","units":242,"orders":0,"rev":5844300,"shipInc":0,"cogs":2666840,"pack":0,"fee":0,"shipCost":0,"ads":1291612},{"m":0,"c":"direct","p":"MK","units":833,"orders":833,"rev":24266681,"shipInc":2499000,"cogs":6978041,"pack":569772,"fee":1213334,"shipCost":1790950,"ads":7196496},{"m":0,"c":"mmall","p":"MK","units":215,"orders":215,"rev":6084070,"shipInc":0,"cogs":1801055,"pack":147060,"fee":0,"shipCost":462250,"ads":0},{"m":0,"c":"cp","p":"MK","units":30,"orders":0,"rev":657300,"shipInc":0,"cogs":251310,"pack":0,"fee":0,"shipCost":0,"ads":145266},{"m":0,"c":"direct","p":"MC","units":593,"orders":593,"rev":12670168,"shipInc":1779000,"cogs":4434559,"pack":0,"fee":633509,"shipCost":1274950,"ads":2629714},{"m":0,"c":"mmall","p":"MC","units":270,"orders":270,"rev":6106769,"shipInc":0,"cogs":2137369,"pack":0,"fee":0,"shipCost":580500,"ads":0},{"m":0,"c":"cp","p":"MC","units":268,"orders":0,"rev":4127570,"shipInc":0,"cogs":1444649,"pack":0,"fee":0,"shipCost":0,"ads":912208},{"m":0,"c":"direct","p":"ETC","units":13211,"orders":847,"rev":29317480,"shipInc":2541000,"cogs":10261118,"pack":0,"fee":1465874,"shipCost":1821050,"ads":11742993},{"m":0,"c":"mmall","p":"ETC","units":551,"orders":334,"rev":7506497,"shipInc":0,"cogs":2627274,"pack":0,"fee":0,"shipCost":718100,"ads":0},{"m":0,"c":"cp","p":"ETC","units":864,"orders":0,"rev":10295715,"shipInc":0,"cogs":3603500,"pack":0,"fee":0,"shipCost":0,"ads":2275392},{"m":0,"c":"direct","p":"DWPLUS","units":91,"orders":91,"rev":6024502,"shipInc":364000,"cogs":2126306,"pack":70889,"fee":301225,"shipCost":195650,"ads":2664646},{"m":0,"c":"mmall","p":"DWPLUS","units":15,"orders":15,"rev":659295,"shipInc":0,"cogs":350490,"pack":11685,"fee":0,"shipCost":32250,"ads":0},{"m":0,"c":"cp","p":"DWPLUS","units":51,"orders":0,"rev":2287350,"shipInc":0,"cogs":1191666,"pack":0,"fee":0,"shipCost":0,"ads":505513},{"m":2,"c":"cp","p":"PH","units":0,"orders":0,"rev":0,"shipInc":0,"cogs":0,"pack":0,"fee":0,"shipCost":0,"ads":0},{"m":5,"c":"cp","p":"DWPRO","units":0,"orders":0,"rev":0,"shipInc":0,"cogs":0,"pack":0,"fee":0,"shipCost":0,"ads":0},{"m":6,"c":"cp","p":"MK","units":0,"orders":0,"rev":0,"shipInc":0,"cogs":0,"pack":0,"fee":0,"shipCost":0,"ads":0},{"m":6,"c":"cp","p":"PH","units":0,"orders":0,"rev":0,"shipInc":0,"cogs":0,"pack":0,"fee":0,"shipCost":0,"ads":0},{"m":7,"c":"cp","p":"PH","units":0,"orders":0,"rev":0,"shipInc":0,"cogs":0,"pack":0,"fee":0,"shipCost":0,"ads":0}],"fixed":[78000000.0,67000000.0,60000000.0,89000000.0,77000000.0,58000000.0,48000000.0,43000000.0],"variable":[38000000.0,0,23000000.0,14000000.0,0,0,16000000.0,0]};
 const PRODUCTS=[{id:'MK',name:'맥세이프킥프레임'},{id:'MC',name:'맥세이프케이스'},{id:'PH',name:'PH스탠드'},{id:'DWPRO',name:'DW스탠드프로'},{id:'DWPLUS',name:'DW스탠드플러스'},{id:'ETC',name:'기타'}];
 const CHANNELS=[{id:'direct',name:'자사몰·네이버'},{id:'cp',name:'쿠팡'},{id:'mmall',name:'M몰'}];
+const CH_COLOR={direct:'var(--blue)',cp:'var(--yellow)',mmall:'var(--green)'};
 const MONTHS=['1월','2월','3월','4월','5월','6월','7월','8월'];
-const CELLS=DATA.cells;
-function sum(cells){
- const s={units:0,orders:0,rev:0,shipInc:0,cogs:0,pack:0,fee:0,shipCost:0,ads:0};
- cells.forEach(c=>{for(const k in s)s[k]+=c[k];});
- s.sales=s.rev+s.shipInc;
- s.contrib=s.sales-s.cogs-s.pack-s.fee-s.shipCost-s.ads;
- return s;
-}
-
-// ===== APP =====
-const CH_COLOR={direct:'var(--s1)',cp:'var(--s2)',mmall:'var(--s3)'};
-const S={month:'all',ch:'all',prod:'PH'};
+const CELLS=DATA.cells, ALL=[0,1,2,3,4,5,6,7];
+const S={month:'all'};
 const $=id=>document.getElementById(id);
 const NS='http://www.w3.org/2000/svg';
-const man=v=>Math.round(v/1e4).toLocaleString('ko-KR');
+const man=v=>(v<0?'−':'')+Math.round(Math.abs(v)/1e4).toLocaleString('ko-KR');
 function fmt(v){const a=Math.abs(v),sg=v<0?'−':'';return a>=1e8?sg+(a/1e8).toFixed(2)+'억':sg+Math.round(a/1e4).toLocaleString('ko-KR')+'만';}
 const won=v=>(v<0?'−':'')+Math.round(Math.abs(v)).toLocaleString('ko-KR')+'원';
 const pct=(v,d=1)=>isFinite(v)?(v*100).toFixed(d)+'%':'—';
-function cellsFor({months,ch='all',prod}){
- return CELLS.filter(c=>months.includes(c.m)&&(ch==='all'||c.c===ch)&&(!prod||c.p===prod));
-}
-function totals(months,ch){
- const s=sum(cellsFor({months,ch}));
- s.variable=ch==='all'?months.reduce((a,m)=>a+DATA.variable[m],0):0;
- s.fixed=ch==='all'?months.reduce((a,m)=>a+DATA.fixed[m],0):0;
- s.op=s.contrib-s.variable-s.fixed;
- return s;
-}
-const ALL=[0,1,2,3,4,5,6,7];
+function sum(cells){const s={units:0,orders:0,rev:0,shipInc:0,cogs:0,pack:0,fee:0,shipCost:0,ads:0};cells.forEach(c=>{for(const k in s)s[k]+=c[k];});s.sales=s.rev+s.shipInc;s.contrib=s.sales-s.cogs-s.pack-s.fee-s.shipCost-s.ads;return s;}
+const pick=({months,ch,prod})=>CELLS.filter(c=>months.includes(c.m)&&(!ch||c.c===ch)&&(!prod||c.p===prod));
+function totals(months){const s=sum(pick({months}));s.variable=months.reduce((a,m)=>a+DATA.variable[m],0);s.fixed=months.reduce((a,m)=>a+DATA.fixed[m],0);s.op=s.contrib-s.variable-s.fixed;return s;}
 const period=()=>S.month==='all'?ALL:[+S.month];
 
-// tooltip
 const tip=$('tip');
-function showTip(e,html){tip.innerHTML=html;tip.hidden=false;moveTip(e);}
+function showTip(e,h){tip.innerHTML=h;tip.hidden=false;moveTip(e);}
 function moveTip(e){const w=tip.offsetWidth,h=tip.offsetHeight;let x=e.clientX+14,y=e.clientY-h-10;if(x+w>innerWidth-8)x=e.clientX-w-14;if(y<8)y=e.clientY+16;tip.style.left=x+'px';tip.style.top=y+'px';}
-function hideTip(){tip.hidden=true;}
-function hover(el,fn){el.addEventListener('pointerenter',e=>showTip(e,fn()));el.addEventListener('pointermove',moveTip);el.addEventListener('pointerleave',hideTip);}
-function el(tag,attrs={},parent){const n=document.createElementNS(NS,tag);for(const k in attrs)n.setAttribute(k,attrs[k]);if(parent)parent.appendChild(n);return n;}
-function txt(parent,x,y,s,attrs={}){const t=el('text',{x,y,...attrs},parent);t.textContent=s;return t;}
-function niceMax(v){const p=Math.pow(10,Math.floor(Math.log10(v)));const n=v/p;return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p;}
+function hover(el,fn){el.addEventListener('pointerenter',e=>showTip(e,fn()));el.addEventListener('pointermove',moveTip);el.addEventListener('pointerleave',()=>tip.hidden=true);}
+function el(tag,a={},p){const n=document.createElementNS(NS,tag);for(const k in a)n.setAttribute(k,a[k]);if(p)p.appendChild(n);return n;}
+function txt(p,x,y,s,a={}){const t=el('text',{x,y,...a},p);t.textContent=s;return t;}
+function niceMax(v){if(v<=0)return 1;const p=Math.pow(10,Math.floor(Math.log10(v)));const n=v/p;return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p;}
+const sw=c=>`<i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${c};margin-right:5px"></i>`;
 
-// ---- filters
-function initFilters(){
- const sel=$('f-month');
- sel.innerHTML='<option value="all">1~8월 누적</option>'+MONTHS.map((m,i)=>`<option value="${i}">${m}</option>`).join('');
- sel.value=S.month;sel.onchange=()=>{S.month=sel.value;render();};
- const g=$('f-ch');
- [{id:'all',name:'전체'},...CHANNELS].forEach(c=>{const b=document.createElement('button');b.className='chip';b.dataset.v=c.id;b.textContent=c.name;b.setAttribute('aria-pressed',c.id===S.ch);b.onclick=()=>{S.ch=c.id;g.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===S.ch));render();};g.appendChild(b);});
-}
+function initFilters(){const sel=$('f-month');sel.innerHTML='<option value="all">1~8월 누적</option>'+MONTHS.map((m,i)=>`<option value="${i}">${m}</option>`).join('');sel.value=S.month;sel.onchange=()=>{S.month=sel.value;render();};}
 
-// ---- KPIs
-function delta(cur,prev,isPct){
- if(prev==null)return '';
- const d=isPct?cur-prev:(prev===0?0:(cur-prev)/Math.abs(prev));
- const cls=d>=0?'up':'dn';const arrow=d>=0?'▲':'▼';
- return `<span class="${cls}">${arrow} ${isPct?(Math.abs(d)*100).toFixed(1)+'%p':(Math.abs(d)*100).toFixed(1)+'%'}</span> 전월 대비`;
-}
+function delta(cur,prev,isPct){if(prev==null)return '';const d=isPct?cur-prev:(prev===0?0:(cur-prev)/Math.abs(prev));return `<span class="${d>=0?'up':'dn'}">${d>=0?'▲':'▼'} ${isPct?(Math.abs(d)*100).toFixed(1)+'%p':(Math.abs(d)*100).toFixed(1)+'%'}</span> 전월 대비`;}
 function renderKpis(){
- const s=totals(period(),S.ch);
- const m=S.month==='all'?null:+S.month;
- const p=m!=null&&m>0?totals([m-1],S.ch):null;
+ const s=totals(period());const m=S.month==='all'?null:+S.month;const p=m!=null&&m>0?totals([m-1]):null;
  const label=m==null?'1~8월 누적':(m===0?'1월 (비교 없음)':'');
- const opOK=S.ch==='all';
- const roas=s.ads?s.rev/s.ads:NaN;
  const items=[
   {l:'매출',v:fmt(s.sales),d:p?delta(s.sales,p.sales):label},
   {l:'공헌이익',v:fmt(s.contrib),d:`매출의 ${pct(s.contrib/s.sales)}`+(p?' · '+delta(s.contrib,p.contrib):'')},
-  {l:'영업이익',hero:true,v:opOK?fmt(s.op):'—',d:opOK?(p?delta(s.op,p.op):label):'고정비는 전체 채널에서만 배분'},
-  {l:'영업이익률',v:opOK?pct(s.op/s.sales):'—',d:opOK?(p?delta(s.op/s.sales,p.op/p.sales,true):label):'채널 필터 해제 시 표시'},
-  {l:'광고비',v:fmt(s.ads),d:s.ads?`ROAS ${Math.round(roas*100)}% · 매출의 ${pct(s.ads/s.sales)}`:'광고 없음'}
- ];
- $('kpis').innerHTML=items.map(i=>`<div class="kpi${i.hero?' hero':''}"><span class="l">${i.l}</span><span class="v num">${i.v}</span><span class="d">${i.d||'&nbsp;'}</span></div>`).join('');
+  {l:'영업이익',hero:1,v:fmt(s.op),cls:s.op<0?'neg':'pos',d:p?delta(s.op,p.op):label},
+  {l:'영업이익률',v:pct(s.op/s.sales),cls:s.op<0?'neg':'pos',d:p?delta(s.op/s.sales,p.op/p.sales,true):label},
+  {l:'광고비',v:fmt(s.ads),d:`ROAS ${Math.round(s.rev/s.ads*100)}% · 매출의 ${pct(s.ads/s.sales)}`}];
+ $('kpis').innerHTML=items.map(i=>`<div class="kpi${i.hero?' hero':''}"><span class="l">${i.l}</span><span class="v num ${i.cls||''}">${i.v}</span><span class="d">${i.d||'&nbsp;'}</span></div>`).join('');
 }
 
-// ---- Waterfall
 function renderWaterfall(){
- const s=totals(period(),S.ch);const svg=$('wf');svg.innerHTML='';
- const steps=[
-  {n:'상품매출',v:s.rev,t:'in'},{n:'배송비 수입',v:s.shipInc,t:'in'},
-  {n:'제품 원가',v:-s.cogs},{n:'포장부자재',v:-s.pack},{n:'수수료',v:-s.fee},{n:'배송 원가',v:-s.shipCost},{n:'광고비',v:-s.ads},
-  {n:'공헌이익',t:'total'}];
- if(S.ch==='all')steps.push({n:'변동비',v:-s.variable},{n:'고정비',v:-s.fixed},{n:'영업이익',t:'total'});
- $('wf-hint').textContent=S.ch==='all'?'어떤 비용이 이익을 가장 많이 가져가는지 보여줍니다. 막대에 마우스를 올리면 매출 대비 비율이 보입니다.':'채널을 고르면 고정비를 나눌 수 없어 공헌이익까지만 보여줍니다.';
- const W=900,H=300,L=52,R=12,T=24,B=48;
- let run=0,mx=0,mn=0;const bars=steps.map(st=>{let y0,y1;if(st.t==='total'){y0=0;y1=run;}else{y0=run;run+=st.v;y1=run;}mx=Math.max(mx,y0,y1);mn=Math.min(mn,y0,y1);return {...st,y0,y1,val:st.t==='total'?run:st.v};});
- const top=niceMax(mx);const bot=mn<0?-niceMax(-mn):0;
- const y=v=>T+(top-v)/(top-bot)*(H-T-B);
+ const s=totals(period());const svg=$('wf');svg.innerHTML='';
+ const steps=[{n:'상품매출',v:s.rev,t:'in'},{n:'배송비 수입',v:s.shipInc,t:'in'},{n:'제품 원가',v:-s.cogs},{n:'포장부자재',v:-s.pack},{n:'수수료',v:-s.fee},{n:'배송 원가',v:-s.shipCost},{n:'광고비',v:-s.ads},{n:'공헌이익',t:'total'},{n:'변동비',v:-s.variable},{n:'고정비',v:-s.fixed},{n:'영업이익',t:'total'}];
+ const W=900,H=300,L=56,R=12,T=24,B=48;let run=0,mx=0,mn=0;
+ const bars=steps.map(st=>{let y0,y1;if(st.t==='total'){y0=0;y1=run;}else{y0=run;run+=st.v;y1=run;}mx=Math.max(mx,y0,y1);mn=Math.min(mn,y0,y1);return {...st,y0,y1,val:st.t==='total'?run:st.v};});
+ const top=niceMax(mx),bot=mn<0?-niceMax(-mn):0;const y=v=>T+(top-v)/(top-bot)*(H-T-B);
  for(let i=0;i<=4;i++){const v=bot+(top-bot)*i/4;el('line',{x1:L,x2:W-R,y1:y(v),y2:y(v),class:'gl'},svg);txt(svg,L-8,y(v)+4,fmt(v),{'text-anchor':'end'});}
- el('line',{x1:L,x2:W-R,y1:y(0),y2:y(0),class:'base'},svg);
+ el('line',{x1:L,x2:W-R,y1:y(0),y2:y(0),stroke:'var(--line2)'},svg);
  const bw=(W-L-R)/bars.length;
  bars.forEach((b,i)=>{
-  const x=L+i*bw+bw*.18,w=bw*.64;const ya=y(Math.max(b.y0,b.y1)),yb=y(Math.min(b.y0,b.y1));
-  const fill=b.t==='total'?(b.val<0?'var(--neg)':'var(--accent)'):b.t==='in'?'var(--s1)':'var(--n3)';
-  const r=el('rect',{x,y:ya,width:w,height:Math.max(1,yb-ya),rx:3,fill},svg);
-  if(i<bars.length-1){const yn=y(b.t==='total'?b.val:b.y1);el('line',{x1:x+w,x2:x+bw,y1:yn,y2:yn,stroke:'var(--n4)','stroke-dasharray':'3 3'},svg);}
-  txt(svg,x+w/2,ya-6,(b.t||b.val>=0?'':'')+fmt(b.val),{'text-anchor':'middle',class:'val','font-weight':b.t==='total'?600:400});
-  txt(svg,x+w/2,H-B+18,b.n,{'text-anchor':'middle','font-weight':b.t==='total'?600:400,fill:b.t==='total'?'var(--fg)':'var(--fg2)'});
+  const x=L+i*bw+bw*.18,w=bw*.64,ya=y(Math.max(b.y0,b.y1)),yb=y(Math.min(b.y0,b.y1));
+  const fill=b.t==='total'?(b.val<0?'var(--red)':'var(--accent)'):b.t==='in'?'var(--blue)':'var(--cost)';
+  el('rect',{x,y:ya,width:w,height:Math.max(1,yb-ya),rx:3,fill},svg);
+  if(i<bars.length-1){const yn=y(b.t==='total'?b.val:b.y1);el('line',{x1:x+w,x2:x+bw,y1:yn,y2:yn,stroke:'var(--line2)','stroke-dasharray':'3 3'},svg);}
+  txt(svg,x+w/2,ya-6,fmt(b.val),{'text-anchor':'middle',class:'val','font-weight':b.t==='total'?600:400,fill:b.t==='total'&&b.val<0?'var(--red)':'var(--fg)'});
+  txt(svg,x+w/2,H-B+18,b.n,{'text-anchor':'middle','font-weight':b.t==='total'?600:400});
   txt(svg,x+w/2,H-B+34,pct(Math.abs(b.val)/s.sales),{'text-anchor':'middle',fill:'var(--muted)'});
-  const hit=el('rect',{x:L+i*bw,y:T,width:bw,height:H-T-B,fill:'transparent',class:'bar-hit'},svg);
+  const hit=el('rect',{x:L+i*bw,y:T,width:bw,height:H-T-B,fill:'transparent'},svg);
   hover(hit,()=>`<b>${b.n}</b><br><span class="num">${won(b.val)}</span><br>매출 대비 ${pct(Math.abs(b.val)/s.sales)}`);
  });
 }
 
-// ---- Monthly revenue stacked
+function monthBars(svgId,W,H,vals,opts){
+ const svg=$(svgId);svg.innerHTML='';const L=52,R=8,T=22,B=28;
+ const mx=Math.max(0,...vals.map(v=>v.v),...(opts.line||[0])),mn=Math.min(0,...vals.map(v=>v.v));
+ const top=niceMax(mx),bot=mn<0?-niceMax(-mn):0;const y=v=>T+(top-v)/(top-bot)*(H-T-B);
+ const ticks=bot<0?[bot,bot/2,0,top/2,top]:[0,top/4,top/2,top*3/4,top];
+ ticks.forEach(v=>{el('line',{x1:L,x2:W-R,y1:y(v),y2:y(v),class:'gl'},svg);txt(svg,L-6,y(v)+4,fmt(v),{'text-anchor':'end'});});
+ el('line',{x1:L,x2:W-R,y1:y(0),y2:y(0),stroke:'var(--line2)'},svg);
+ const bw=(W-L-R)/8;
+ vals.forEach((d,m)=>{
+  const dim=S.month!=='all'&&+S.month!==m;const x=L+m*bw+bw*.2,w=bw*.6;const ya=y(Math.max(0,d.v)),yb=y(Math.min(0,d.v));
+  el('rect',{x,y:ya,width:w,height:Math.max(1,yb-ya),rx:3,fill:d.v<0?'var(--red)':'var(--accent)',opacity:dim?.3:1},svg);
+  txt(svg,x+w/2,d.v>=0?ya-6:yb+13,fmt(d.v),{'text-anchor':'middle',class:'val',fill:d.v<0?'var(--red)':'var(--fg)','font-size':W<600?10:11});
+  txt(svg,x+w/2,H-B+16,MONTHS[m],{'text-anchor':'middle'});
+ });
+ if(opts.line){const pts=opts.line.map((v,m)=>`${L+m*bw+bw*.5},${y(v)}`).join(' ');el('polyline',{points:pts,fill:'none',stroke:'var(--red)','stroke-width':2,'stroke-dasharray':'5 4'},svg);opts.line.forEach((v,m)=>el('circle',{cx:L+m*bw+bw*.5,cy:y(v),r:3,fill:'var(--red)'},svg));}
+ vals.forEach((d,m)=>{const hit=el('rect',{x:L+m*bw,y:T,width:bw,height:H-T-B,fill:'transparent'},svg);hover(hit,()=>opts.tip(d,m));});
+}
 function renderRev(){
- const svg=$('rev');svg.innerHTML='';const W=520,H=250,L=48,R=8,T=18,B=28;
- const chs=S.ch==='all'?CHANNELS:CHANNELS.filter(c=>c.id===S.ch);
- const data=ALL.map(m=>chs.map(c=>sum(cellsFor({months:[m],ch:c.id})).sales));
- const top=niceMax(Math.max(...data.map(a=>a.reduce((x,y)=>x+y,0))));
- const y=v=>T+(1-v/top)*(H-T-B);
+ const svg=$('rev');svg.innerHTML='';const W=520,H=250,L=52,R=8,T=18,B=28;
+ const data=ALL.map(m=>CHANNELS.map(c=>sum(pick({months:[m],ch:c.id})).sales));
+ const top=niceMax(Math.max(...data.map(a=>a.reduce((x,y)=>x+y,0))));const y=v=>T+(1-v/top)*(H-T-B);
  for(let i=0;i<=4;i++){const v=top*i/4;el('line',{x1:L,x2:W-R,y1:y(v),y2:y(v),class:'gl'},svg);txt(svg,L-6,y(v)+4,fmt(v),{'text-anchor':'end'});}
  const bw=(W-L-R)/8;
  ALL.forEach(m=>{
-  const dim=S.month!=='all'&&+S.month!==m;const g=el('g',{opacity:dim?.35:1},svg);
-  let acc=0;const x=L+m*bw+bw*.2,w=bw*.6;
-  data[m].forEach((v,ci)=>{const y0=y(acc),y1=y(acc+v);acc+=v;el('rect',{x,y:y1+(ci?0:0),width:w,height:Math.max(0,y0-y1-2),rx:ci===data[m].length-1?3:0,fill:CH_COLOR[chs[ci].id]},g);});
+  const g=el('g',{opacity:S.month!=='all'&&+S.month!==m?.3:1},svg);let acc=0;const x=L+m*bw+bw*.2,w=bw*.6;
+  data[m].forEach((v,ci)=>{const y0=y(acc),y1=y(acc+v);acc+=v;el('rect',{x,y:y1,width:w,height:Math.max(0,y0-y1-2),rx:ci===2?3:0,fill:CH_COLOR[CHANNELS[ci].id]},g);});
   txt(svg,x+w/2,H-B+16,MONTHS[m],{'text-anchor':'middle'});
   const hit=el('rect',{x:L+m*bw,y:T,width:bw,height:H-T-B,fill:'transparent'},svg);
-  hover(hit,()=>`<b>${MONTHS[m]}</b> 매출 <span class="num">${fmt(acc)}</span><br>`+chs.map((c,ci)=>`<i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${CH_COLOR[c.id]};margin-right:5px"></i>${c.name} <span class="num">${fmt(data[m][ci])}</span>`).join('<br>'));
+  hover(hit,()=>`<b>${MONTHS[m]}</b> 매출 <span class="num">${fmt(acc)}</span><br>`+CHANNELS.map((c,ci)=>`${sw(CH_COLOR[c.id])}${c.name} <span class="num">${fmt(data[m][ci])}</span>`).join('<br>'));
  });
- $('rev-legend').innerHTML=chs.map(c=>`<span><i style="background:${CH_COLOR[c.id]}"></i>${c.name}</span>`).join('');
+ $('rev-legend').innerHTML=CHANNELS.map(c=>`<span><i style="background:${CH_COLOR[c.id]}"></i>${c.name}</span>`).join('');
 }
-
-// ---- Monthly OP
+function renderCm(){
+ const t=ALL.map(m=>totals([m]));
+ monthBars('cm',520,250,t.map(s=>({v:s.contrib,s})),{line:t.map(s=>s.fixed+s.variable),
+  tip:(d,m)=>`<b>${MONTHS[m]}</b><br>공헌이익 <span class="num">${won(d.s.contrib)}</span> (${pct(d.s.contrib/d.s.sales)})<br>고정비+변동비 <span class="num">${won(d.s.fixed+d.s.variable)}</span><br>부족분 <span class="num">${won(d.s.contrib-d.s.fixed-d.s.variable)}</span>`});
+}
 function renderOp(){
- const svg=$('op');svg.innerHTML='';const W=520,H=250,L=48,R=8,T=22,B=28;
- const isAll=S.ch==='all';
- $('op-title').textContent=isAll?'월별 영업이익':'월별 공헌이익 ('+CHANNELS.find(c=>c.id===S.ch).name+')';
- $('op-hint').textContent=isAll?'막대 위 숫자는 영업이익률입니다.':'채널별로는 고정비를 나누지 않아 공헌이익을 보여줍니다.';
- const vals=ALL.map(m=>{const s=totals([m],S.ch);return {v:isAll?s.op:s.contrib,r:(isAll?s.op:s.contrib)/s.sales};});
- const mx=Math.max(0,...vals.map(d=>d.v)),mn=Math.min(0,...vals.map(d=>d.v));
- const top=niceMax(mx||1),bot=mn<0?-niceMax(-mn):0;
- const y=v=>T+(top-v)/(top-bot)*(H-T-B);
- const ticks=bot<0?[bot,bot/2,0,top/2,top]:[0,top/4,top/2,top*3/4,top];
- ticks.forEach(v=>{el('line',{x1:L,x2:W-R,y1:y(v),y2:y(v),class:'gl'},svg);txt(svg,L-6,y(v)+4,fmt(v),{'text-anchor':'end'});});
- el('line',{x1:L,x2:W-R,y1:y(0),y2:y(0),stroke:'var(--n3)'},svg);
- const bw=(W-L-R)/8;
- vals.forEach((d,m)=>{
-  const dim=S.month!=='all'&&+S.month!==m;const x=L+m*bw+bw*.2,w=bw*.6;
-  const ya=y(Math.max(0,d.v)),yb=y(Math.min(0,d.v));
-  el('rect',{x,y:ya,width:w,height:Math.max(1,yb-ya),rx:3,fill:d.v<0?'var(--neg)':'var(--accent)',opacity:dim?.35:1},svg);
-  txt(svg,x+w/2,d.v>=0?ya-6:yb+13,pct(d.r),{'text-anchor':'middle',class:'val'});
-  txt(svg,x+w/2,H-B+16,MONTHS[m],{'text-anchor':'middle'});
-  const hit=el('rect',{x:L+m*bw,y:T,width:bw,height:H-T-B,fill:'transparent'},svg);
-  hover(hit,()=>`<b>${MONTHS[m]}</b><br>${isAll?'영업이익':'공헌이익'} <span class="num">${won(d.v)}</span><br>이익률 ${pct(d.r)}`);
- });
+ const t=ALL.map(m=>totals([m]));
+ monthBars('op',900,250,t.map(s=>({v:s.op,s})),{tip:(d,m)=>`<b>${MONTHS[m]}</b><br>영업이익 <span class="num">${won(d.s.op)}</span><br>영업이익률 ${pct(d.s.op/d.s.sales)}<br>공헌이익 ${fmt(d.s.contrib)} − 고정비 ${fmt(d.s.fixed)} − 변동비 ${fmt(d.s.variable)}`});
 }
 
-// ---- Heatmap
-function bin(r){return r<0?-1:Math.min(5,Math.floor(r*100/10));}
-function renderHeat(){
- const t=$('heat');const pm=period();
- const cols=[...CHANNELS,{id:'all',name:'전체'}];
- let h='<thead><tr><th style="text-align:left">제품</th>'+cols.map(c=>`<th>${c.name}</th>`).join('')+'</tr></thead><tbody>';
- const rows=[...PRODUCTS,{id:null,name:'전체'}];
- rows.forEach(p=>{
-  h+=`<tr><td>${p.id?p.name:'<b>전체</b>'}</td>`;
-  cols.forEach(c=>{
-   const s=sum(cellsFor({months:pm,ch:c.id,prod:p.id||undefined}));const r=s.contrib/s.sales;const b=bin(r);
-   const dim=S.ch!=='all'&&c.id!=='all'&&c.id!==S.ch;
-   const bg=b<0?'var(--neg)':`var(--h${b})`;const fg=b>=3||b<0?'var(--hti)':'var(--ht)';
-   h+=`<td class="cell" data-p="${p.name}" data-c="${c.name}" data-s="${s.sales}" data-k="${s.contrib}" style="background:${bg};color:${fg};opacity:${dim?.3:1}">${r<.15?'<span style="color:var(--crit)">●</span> ':''}${pct(r)}</td>`;
-  });
-  h+='</tr>';
+function renderProd(){
+ const pm=period();const tot=sum(pick({months:pm})).contrib;
+ const rows=PRODUCTS.map(p=>{const s=sum(pick({months:pm,prod:p.id}));const byCh=CHANNELS.map(c=>sum(pick({months:pm,prod:p.id,ch:c.id})).contrib);return {p,s,byCh};}).sort((a,b)=>b.s.contrib-a.s.contrib);
+ const mx=Math.max(...rows.map(r=>Math.max(r.s.contrib,r.byCh.reduce((a,v)=>a+Math.max(0,v),0))),1);
+ let h='<div class="prow head"><span>제품</span><span>공헌이익</span><span class="r">이익률</span><span class="r share">비중</span></div>';
+ rows.forEach((r,i)=>{
+  const w=Math.max(0,r.s.contrib)/mx*100;const pos=r.byCh.map(v=>Math.max(0,v));const ps=pos.reduce((a,b)=>a+b,0)||1;
+  const segs=r.s.contrib>0?pos.map((v,ci)=>`<span style="width:${v/ps*100}%;background:${CH_COLOR[CHANNELS[ci].id]};${ci<2?'border-right:2px solid var(--surface)':''}"></span>`).join(''):'';
+  h+=`<div class="prow" data-i="${i}"><span>${r.p.name}</span><div class="track"><div class="fill" style="width:${w}%">${segs}</div><span class="amt" style="left:${Math.min(w,78)}%;${r.s.contrib<0?'color:var(--red)':''}">${fmt(r.s.contrib)}</span></div><span class="r">${pct(r.s.contrib/r.s.sales)}</span><span class="r share">${pct(r.s.contrib/tot)}</span></div>`;
  });
- t.innerHTML=h+'</tbody>';
- t.querySelectorAll('td.cell').forEach(td=>hover(td,()=>`<b>${td.dataset.p} · ${td.dataset.c}</b><br>매출 <span class="num">${fmt(+td.dataset.s)}</span><br>공헌이익 <span class="num">${fmt(+td.dataset.k)}</span>`));
+ $('prod').innerHTML=h;
+ $('prod').querySelectorAll('.prow[data-i]').forEach(d=>{const r=rows[+d.dataset.i];hover(d,()=>`<b>${r.p.name}</b> 공헌이익 <span class="num">${fmt(r.s.contrib)}</span><br>매출 <span class="num">${fmt(r.s.sales)}</span><br>`+CHANNELS.map((c,ci)=>`${sw(CH_COLOR[c.id])}${c.name} <span class="num">${fmt(r.byCh[ci])}</span>`).join('<br>'));});
+ $('prod-legend').innerHTML=CHANNELS.map(c=>`<span><i style="background:${CH_COLOR[c.id]}"></i>${c.name}</span>`).join('');
 }
 
-// ---- Unit economics
+function renderAdr(){
+ const pm=period();
+ const rows=PRODUCTS.map(p=>({p,s:sum(pick({months:pm,prod:p.id}))})).sort((a,b)=>b.s.sales-a.s.sales);
+ const all=sum(pick({months:pm}));
+ const mx=Math.max(...rows.map(r=>r.s.sales),1);
+ let h='<div class="prow head adr"><span>제품</span><span>매출 · 광고비</span><span class="r">광고비율</span><span class="r share">ROAS</span></div>';
+ const line=(name,s,scale,cls)=>{const w=Math.max(0,s.sales)/scale*100,aw=Math.max(0,s.ads)/scale*100;const r=s.ads/s.sales;
+  return `<div class="prow adr ${cls||''}"><span>${name}</span><div class="track" style="background:none"><div class="fill" style="width:${w}%;background:var(--blue-dim);box-shadow:inset 0 0 0 1px var(--blue)"></div><div class="fill" style="width:${aw}%;background:var(--yellow)"></div><span class="amt" style="left:${Math.min(w,70)}%">${fmt(s.sales)} · 광고 ${fmt(s.ads)}</span></div><span class="r" style="color:${r>=.3?'var(--red)':'var(--fg)'};font-weight:600">${pct(r)}</span><span class="r share">${s.ads?Math.round(s.sales/s.ads*100)+'%':'—'}</span></div>`;};
+ rows.forEach(r=>h+=line(r.p.name,r.s,mx));
+ h+=`<div style="height:6px"></div>`+line('전체',all,all.sales,'tot');
+ $('adr').innerHTML=h;
+ const els=$('adr').querySelectorAll('.prow.adr:not(.head)');const list=[...rows.map(r=>r.p.name),'전체'];const ss=[...rows.map(r=>r.s),all];
+ els.forEach((d,i)=>hover(d,()=>`<b>${list[i]}</b><br>매출 <span class="num">${won(ss[i].sales)}</span> (배송비 수입 ${fmt(ss[i].shipInc)} 포함)<br>광고비 <span class="num">${won(ss[i].ads)}</span><br>매출 대비 광고비 ${pct(ss[i].ads/ss[i].sales)}`));
+}
+
 function renderUnit(){
- const tabs=$('p-tabs');
- tabs.innerHTML=PRODUCTS.filter(p=>p.id!=='ETC').map(p=>`<button class="chip" data-p="${p.id}" aria-pressed="${p.id===S.prod}">${p.name}</button>`).join('');
- tabs.querySelectorAll('button').forEach(b=>b.onclick=()=>{S.prod=b.dataset.p;renderUnit();});
  const pm=period();
- let h='<thead><tr><th>채널</th><th>판매수량</th><th>개당 매출<br><span style="font-weight:400">(배송비 수입 포함)</span></th><th>원가+포장</th><th>수수료</th><th>배송 원가</th><th>광고비</th><th>개당 공헌이익</th><th>공헌이익률</th><th>손익분기 ROAS</th><th>실제 ROAS</th></tr></thead><tbody>';
- CHANNELS.forEach(c=>{
-  const s=sum(cellsFor({months:pm,ch:c.id,prod:S.prod}));
-  if(s.units<=0){h+=`<tr><td>${c.name}</td><td class="num">0</td><td colspan="9" style="text-align:left;color:var(--muted)">이 기간 판매 없음</td></tr>`;return;}
-  const u=s.units;
-  const perSales=s.sales/u,cost=(s.cogs+s.pack)/u,fee=s.fee/u,ship=s.shipCost/u,ad=s.ads/u,cm=s.contrib/u;
-  const preAd=s.contrib+s.ads;const be=preAd>0?s.rev/preAd:NaN;const roas=s.ads?s.rev/s.ads:NaN;
+ let h='<thead><tr><th>제품</th><th>판매수량</th><th>개당 매출<br><span style="font-weight:400">(배송비 수입 포함)</span></th><th>원가+포장</th><th>수수료</th><th>배송 원가</th><th>광고비</th><th>개당 공헌이익</th><th>공헌이익률</th><th>손익분기 ROAS</th><th>실제 ROAS</th></tr></thead><tbody>';
+ const row=(name,s,cls)=>{
+  const u=s.units||1,preAd=s.contrib+s.ads,be=preAd>0?s.rev/preAd:NaN,roas=s.ads?s.rev/s.ads:NaN;
   const pill=!s.ads?'<span class="pill na">광고 없음</span>':roas>=be?`<span class="pill ok">✓ ${Math.round(roas*100)}%</span>`:`<span class="pill bad">✕ ${Math.round(roas*100)}%</span>`;
-  h+=`<tr><td>${c.name}</td><td class="num">${Math.round(u).toLocaleString('ko-KR')}</td><td class="num">${won(perSales)}</td><td class="num">${won(-cost)}</td><td class="num">${fee?won(-fee):'—'}</td><td class="num">${ship?won(-ship):'—'}</td><td class="num">${ad?won(-ad):'—'}</td><td class="num"><b>${won(cm)}</b></td><td class="num">${pct(s.contrib/s.sales)}</td><td class="num">${s.ads&&isFinite(be)?Math.round(be*100)+'%':'—'}</td><td>${pill}</td></tr>`;
- });
+  return `<tr class="${cls||''}"><td>${name}</td><td class="num">${Math.round(s.units).toLocaleString('ko-KR')}</td><td class="num">${won(s.sales/u)}</td><td class="num">${won(-(s.cogs+s.pack)/u)}</td><td class="num">${won(-s.fee/u)}</td><td class="num">${won(-s.shipCost/u)}</td><td class="num">${won(-s.ads/u)}</td><td class="num ${s.contrib<0?'neg':''}"><b>${won(s.contrib/u)}</b></td><td class="num">${pct(s.contrib/s.sales)}</td><td class="num">${isFinite(be)?Math.round(be*100)+'%':'—'}</td><td>${pill}</td></tr>`;};
+ PRODUCTS.forEach(p=>{h+=row(p.name,sum(pick({months:pm,prod:p.id})));});
+ h+=row('전체',sum(pick({months:pm})),'total');
  $('unit').innerHTML=h+'</tbody>';
- $('unit-note').hidden=S.prod!=='MC';
 }
 
-// ---- Channel mix
-const MIX=[{k:'cogs',n:'제품 원가',c:'var(--n1)'},{k:'pack',n:'포장부자재',c:'var(--n2)'},{k:'fee',n:'수수료',c:'var(--n3)'},{k:'shipCost',n:'배송 원가',c:'var(--n4)'},{k:'ads',n:'광고비',c:'var(--s2)'},{k:'contrib',n:'공헌이익',c:'var(--accent)'}];
-function renderMix(){
- const pm=period();
- $('mix').innerHTML=CHANNELS.map(c=>{
-  const s=sum(cellsFor({months:pm,ch:c.id}));const dim=S.ch!=='all'&&c.id!==S.ch;
-  const segs=MIX.map(m=>({...m,v:s[m.k]/s.sales})).filter(m=>m.v>0.0005);
-  return `<div style="display:grid;grid-template-columns:96px minmax(0,1fr) 92px;gap:10px;align-items:center;margin-bottom:10px;opacity:${dim?.35:1}"><span>${c.name}</span><div style="display:flex;gap:2px;height:22px">${segs.map(m=>`<div class="seg" data-n="${m.n}" data-c="${c.name}" data-v="${m.v}" style="flex:0 0 calc(${(m.v*100).toFixed(2)}% - 2px);background:${m.c};border-radius:3px"></div>`).join('')}</div><span class="num" style="text-align:right;color:var(--fg2)">이익 <b style="color:var(--fg)">${pct(s.contrib/s.sales)}</b></span></div>`;
- }).join('');
- $('mix').querySelectorAll('.seg').forEach(d=>hover(d,()=>`<b>${d.dataset.c} · ${d.dataset.n}</b><br>매출의 ${pct(+d.dataset.v)}`));
- $('mix-legend').innerHTML=MIX.map(m=>`<span><i style="background:${m.c}"></i>${m.n}</span>`).join('');
-}
-
-// ---- P&L table
 function renderPL(){
- const all=S.ch==='all';
- const cols=[...ALL.map(m=>({n:MONTHS[m],s:totals([m],S.ch)})),{n:'합계',s:totals(ALL,S.ch)}];
- const rows=[['상품매출','rev'],['배송비 수입','shipInc'],['매출 합계','sales','total'],['제품 원가','cogs','neg'],['포장부자재','pack','neg'],['플랫폼 수수료','fee','neg'],['배송 원가','shipCost','neg'],['광고비','ads','neg'],['공헌이익','contrib','total'],['변동비','variable','neg',1],['고정비','fixed','neg',1],['영업이익','op','total',1]];
+ const cols=[...ALL.map(m=>({n:MONTHS[m],s:totals([m])})),{n:'합계',s:totals(ALL)}];
+ const rows=[['상품매출','rev'],['배송비 수입','shipInc'],['매출 합계','sales','total'],['제품 원가','cogs','neg'],['포장부자재','pack','neg'],['수수료','fee','neg'],['배송 원가','shipCost','neg'],['광고비','ads','neg'],['공헌이익','contrib','total'],['변동비','variable','neg'],['고정비','fixed','neg'],['영업이익','op','total']];
  let h='<thead><tr><th>항목</th>'+cols.map(c=>`<th>${c.n}</th>`).join('')+'</tr></thead><tbody>';
- rows.forEach(([n,k,t,needAll])=>{h+=`<tr class="${t==='total'?'total':''}"><td>${n}</td>`+cols.map(c=>`<td class="num">${needAll&&!all?'—':(t==='neg'?'−':'')+man(c.s[k])}</td>`).join('')+'</tr>';});
- h+=`<tr class="sub"><td>영업이익률</td>`+cols.map(c=>`<td class="num">${all?pct(c.s.op/c.s.sales):'—'}</td>`).join('')+'</tr>';
+ rows.forEach(([n,k,t])=>{h+=`<tr class="${t==='total'?'total':''}"><td>${n}</td>`+cols.map(c=>{const v=t==='neg'?-c.s[k]:c.s[k];return `<td class="num ${k==='op'&&v<0?'neg':''}">${man(v)}</td>`;}).join('')+'</tr>';});
+ h+='<tr class="sub"><td>영업이익률</td>'+cols.map(c=>`<td class="num">${pct(c.s.op/c.s.sales)}</td>`).join('')+'</tr>';
  $('pl').innerHTML=h+'</tbody>';
 }
 
-function render(){renderKpis();renderWaterfall();renderRev();renderOp();renderHeat();renderUnit();renderMix();renderPL();}
+function setTheme(mode){document.documentElement.setAttribute('data-theme',mode);document.documentElement.classList.toggle('light',mode==='light');try{localStorage.setItem('theme',mode);}catch(e){}document.querySelectorAll('.theme-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===mode));}
+function render(){renderKpis();renderWaterfall();renderRev();renderCm();renderOp();renderProd();renderAdr();renderUnit();renderPL();}
 initFilters();render();
+setTheme(document.documentElement.getAttribute('data-theme')==='light'?'light':'dark');
+document.querySelectorAll('.theme-btn').forEach(b=>b.onclick=()=>setTheme(b.dataset.mode));
 
 </script>
 </body>
