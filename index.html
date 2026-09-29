@@ -167,11 +167,11 @@ td.neg{color:var(--red)}
 
  <section class="panel">
   <h2>제품별 매출 대비 광고비</h2>
-  <p class="hint">제품을 고르면 월별 매출과 광고비를 나란히 보여줍니다. 매출은 모든 채널(배송비 수입 포함), 광고비는 자사몰·네이버·쿠팡 광고를 모두 더했습니다. 막대 위 숫자는 광고비율입니다.</p>
+  <p class="hint">제품을 고르면 월별 매출 대비 광고비(%)를 보여줍니다. 매출은 모든 채널(배송비 수입 포함), 광고비는 자사몰·네이버·쿠팡 광고를 모두 더했습니다. 35% 이상인 달은 빨간색입니다.</p>
   <div class="tabs" id="a-tabs" role="group" aria-label="제품 선택"></div>
   <div class="pk" id="a-kpis"></div>
   <div class="scroll"><svg id="adm" viewBox="0 0 900 260" style="width:100%;min-width:560px;height:auto" role="img" aria-label="제품 월별 매출과 광고비"></svg></div>
-  <div class="legend"><span><i style="background:var(--blue)"></i>매출</span><span><i style="background:var(--yellow)"></i>광고비</span></div>
+  <div class="legend"><span><i style="background:var(--yellow);height:3px;width:14px;border-radius:2px;vertical-align:3px"></i>매출 대비 광고비</span><span><i style="background:none;border-top:2px dashed var(--muted);border-radius:0;height:0;width:14px;vertical-align:3px"></i>1~8월 평균</span></div>
  </section>
 
  <section class="panel">
@@ -327,7 +327,7 @@ S.prod='PH';
 function renderProd(){
  const tabs=$('p-tabs');
  tabs.innerHTML=PROD_ORDER.map(id=>`<button class="pbtn" data-p="${id}" aria-pressed="${id===S.prod}">${PRODUCTS.find(p=>p.id===id).name}</button>`).join('');
- tabs.querySelectorAll('button').forEach(b=>b.onclick=()=>{S.prod=b.dataset.p;renderProd();});
+ tabs.querySelectorAll('button').forEach(b=>b.onclick=()=>{S.prod=S.adp=b.dataset.p;renderProd();renderAdr();});
  const pm=period();const s=sum(pick({months:pm,prod:S.prod}));const all=sum(pick({months:pm})).contrib;
  $('p-kpis').innerHTML=[['매출',fmt(s.sales)],['공헌이익',fmt(s.contrib)],['공헌이익률',pct(s.contrib/s.sales)],['전체 공헌이익 중',pct(s.contrib/all)]].map(([l,v])=>`<div><span class="l">${l}</span><span class="v num">${v}</span></div>`).join('');
  const vals=ALL.map(m=>{const x=sum(pick({months:[m],prod:S.prod}));return {v:x.contrib,s:x,ch:CHANNELS.map(c=>sum(pick({months:[m],prod:S.prod,ch:c.id})).contrib)};});
@@ -339,24 +339,28 @@ S.adp='PH';
 function renderAdr(){
  const tabs=$('a-tabs');
  tabs.innerHTML=PROD_ORDER.map(id=>`<button class="pbtn" data-p="${id}" aria-pressed="${id===S.adp}">${PRODUCTS.find(p=>p.id===id).name}</button>`).join('');
- tabs.querySelectorAll('button').forEach(b=>b.onclick=()=>{S.adp=b.dataset.p;renderAdr();});
+ tabs.querySelectorAll('button').forEach(b=>b.onclick=()=>{S.prod=S.adp=b.dataset.p;renderProd();renderAdr();});
  const pm=period();const s=sum(pick({months:pm,prod:S.adp}));
  $('a-kpis').innerHTML=[['매출',fmt(s.sales)],['광고비',fmt(s.ads)],['매출 대비 광고비',pct(s.ads/s.sales)],['ROAS',s.ads?Math.round(s.sales/s.ads*100)+'%':'—']].map(([l,v])=>`<div><span class="l">${l}</span><span class="v num">${v}</span></div>`).join('');
- const svg=$('adm');svg.innerHTML='';const W=900,H=260,L=56,R=8,T=26,B=28;
- const t=ALL.map(m=>sum(pick({months:[m],prod:S.adp})));
- const top=niceMax(Math.max(...t.map(x=>x.sales),1));const y=v=>T+(1-v/top)*(H-T-B);
- for(let i=0;i<=4;i++){const v=top*i/4;el('line',{x1:L,x2:W-R,y1:y(v),y2:y(v),class:'gl'},svg);txt(svg,L-6,y(v)+4,fmt(v),{'text-anchor':'end'});}
+ const svg=$('adm');svg.innerHTML='';const W=900,H=260,L=48,R=16,T=30,B=28;
+ const t=ALL.map(m=>{const x=sum(pick({months:[m],prod:S.adp}));return {x,r:x.sales>0?x.ads/x.sales:NaN};});
+ const rs=t.map(d=>d.r).filter(isFinite);const top=Math.max(.1,Math.ceil(Math.max(...rs,.1)*10)/10);
+ const y=v=>T+(1-v/top)*(H-T-B);const name=PRODUCTS.find(p=>p.id===S.adp).name;
+ const steps=Math.round(top/.1);for(let i=0;i<=steps;i++){const v=i*.1;el('line',{x1:L,x2:W-R,y1:y(v),y2:y(v),class:'gl'},svg);txt(svg,L-6,y(v)+4,Math.round(v*100)+'%',{'text-anchor':'end'});}
  el('line',{x1:L,x2:W-R,y1:y(0),y2:y(0),stroke:'var(--line2)'},svg);
- const bw=(W-L-R)/8,w=bw*.3;const name=PRODUCTS.find(p=>p.id===S.adp).name;
- t.forEach((x,m)=>{
-  const g=el('g',{opacity:S.month!=='all'&&+S.month!==m?.3:1},svg);const x0=L+m*bw+bw*.19;
-  el('rect',{x:x0,y:y(Math.max(0,x.sales)),width:w,height:Math.max(1,y(0)-y(Math.max(0,x.sales))),rx:3,fill:'var(--blue)'},g);
-  el('rect',{x:x0+w+3,y:y(x.ads),width:w,height:Math.max(1,y(0)-y(x.ads)),rx:3,fill:'var(--yellow)'},g);
-  const r=x.sales>0?x.ads/x.sales:NaN;
-  txt(g,x0+w+1.5,y(Math.max(x.sales,x.ads))-8,pct(r),{'text-anchor':'middle',class:'val','font-weight':600,fill:r>=.35?'var(--red)':'var(--fg)'});
-  txt(svg,x0+w+1.5,H-B+16,MONTHS[m],{'text-anchor':'middle'});
+ const bw=(W-L-R)/8,cx=m=>L+m*bw+bw/2;
+ const avg=sum(pick({months:ALL,prod:S.adp}));const ar=avg.ads/avg.sales;
+ el('line',{x1:L,x2:W-R,y1:y(ar),y2:y(ar),stroke:'var(--muted)','stroke-dasharray':'4 4'},svg);
+ txt(svg,W-R,y(ar)-5,'1~8월 평균 '+pct(ar),{'text-anchor':'end',fill:'var(--muted)','font-size':10});
+ const pts=t.map((d,m)=>isFinite(d.r)?`${cx(m)},${y(d.r)}`:null).filter(Boolean).join(' ');
+ el('polyline',{points:pts,fill:'none',stroke:'var(--yellow)','stroke-width':2.5,'stroke-linejoin':'round'},svg);
+ t.forEach((d,m)=>{
+  txt(svg,cx(m),H-B+16,MONTHS[m],{'text-anchor':'middle'});
+  if(!isFinite(d.r))return;const dim=S.month!=='all'&&+S.month!==m;
+  el('circle',{cx:cx(m),cy:y(d.r),r:4.5,fill:'var(--yellow)',stroke:'var(--surface)','stroke-width':2,opacity:dim?.4:1},svg);
+  txt(svg,cx(m),y(d.r)-11,pct(d.r),{'text-anchor':'middle',class:'val','font-weight':600,fill:d.r>=.35?'var(--red)':'var(--fg)',opacity:dim?.4:1});
   const hit=el('rect',{x:L+m*bw,y:T,width:bw,height:H-T-B,fill:'transparent'},svg);
-  hover(hit,()=>`<b>${name} · ${MONTHS[m]}</b><br>${sw('var(--blue)')}매출 <span class="num">${won(x.sales)}</span><br>${sw('var(--yellow)')}광고비 <span class="num">${won(x.ads)}</span><br>광고비율 ${pct(r)} · ROAS ${x.ads?Math.round(x.sales/x.ads*100)+'%':'—'}`);
+  hover(hit,()=>`<b>${name} · ${MONTHS[m]}</b><br>매출 대비 광고비 ${pct(d.r)}<br>매출 <span class="num">${won(d.x.sales)}</span><br>광고비 <span class="num">${won(d.x.ads)}</span>`);
  });
 }
 
