@@ -188,7 +188,7 @@ td.neg{color:var(--red)}
   <h2>제품별 개당 수익 구조 <span style="font-size:12px;font-weight:400;color:var(--muted)">B2C 기준</span></h2>
   <p class="hint">모든 채널을 합쳐 한 개 팔 때 얼마 남는지 봅니다.</p>
   <div class="scroll"><table id="unit"></table></div>
-  <p class="note"><b>손익분기 ROAS</b>: 광고비 1원당 이만큼 이상 팔아야 광고를 해도 손해가 아닙니다. ROAS는 우리 매출 기준이라 쿠팡·M몰은 공급가로 계산됩니다.</p>
+  <p class="note"><b>손익분기 ROAS</b>: 광고비 1원당 이만큼 이상 팔아야 광고를 해도 손해가 아닙니다. ROAS는 개당 매출과 같은 기준(배송비 수입 포함)이며, 쿠팡·M몰은 공급가로 계산됩니다.</p>
  </section>
 
  <section class="panel b2b-only" hidden>
@@ -262,7 +262,7 @@ function renderKpis(){
   {l:'공헌이익',v:fmt(s.contrib),d:`매출의 ${pct(s.contrib/s.sales)}`+(p?' · '+delta(s.contrib,p.contrib):'')},
   {l:'영업이익',hero:1,v:fmt(s.op),cls:s.op<0?'neg':'pos',d:p?delta(s.op,p.op):label},
   {l:'영업이익률',v:pct(s.op/s.sales),cls:s.op<0?'neg':'pos',d:p?delta(s.op/s.sales,p.op/p.sales,true):label},
-  {l:'광고비',v:fmt(s.ads),d:`B2C ROAS ${Math.round(s.rev/s.ads*100)}% · B2C 매출의 ${pct(s.ads/s.b2cSales)}`}];
+  {l:'광고비',v:fmt(s.ads),d:`B2C ROAS ${Math.round(s.b2cSales/s.ads*100)}% · B2C 매출의 ${pct(s.ads/s.b2cSales)}`}];
  $('kpis').innerHTML=items.map(i=>`<div class="kpi${i.hero?' hero':''}"><span class="l">${i.l}</span><span class="v num ${i.cls||''}">${i.v}</span><span class="d">${i.d||'&nbsp;'}</span></div>`).join('');
 }
 
@@ -388,7 +388,7 @@ function renderUnit(){
  const pm=period();
  let h='<thead><tr><th>제품</th><th>판매수량</th><th>개당 매출<br><span style="font-weight:400">(배송비 수입 포함)</span></th><th>원가+포장</th><th>수수료</th><th>배송 원가</th><th>광고비</th><th>개당 공헌이익</th><th>공헌이익률</th><th>손익분기 ROAS</th><th>실제 ROAS</th></tr></thead><tbody>';
  const row=(name,s,cls)=>{
-  const u=s.units||1,preAd=s.contrib+s.ads,be=preAd>0?s.rev/preAd:NaN,roas=s.ads?s.rev/s.ads:NaN;
+  const u=s.units||1,preAd=s.contrib+s.ads,be=preAd>0?s.sales/preAd:NaN,roas=s.ads?s.sales/s.ads:NaN;
   const pill=!s.ads?'<span class="pill na">광고 없음</span>':roas>=be?`<span class="pill ok">✓ ${Math.round(roas*100)}%</span>`:`<span class="pill bad">✕ ${Math.round(roas*100)}%</span>`;
   return `<tr class="${cls||''}"><td>${name}</td><td class="num">${Math.round(s.units).toLocaleString('ko-KR')}</td><td class="num">${won(s.sales/u)}</td><td class="num">${won(-(s.cogs+s.pack)/u)}</td><td class="num">${won(-s.fee/u)}</td><td class="num">${won(-s.shipCost/u)}</td><td class="num">${won(-s.ads/u)}</td><td class="num ${s.contrib<0?'neg':''}"><b>${won(s.contrib/u)}</b></td><td class="num">${pct(s.contrib/s.sales)}</td><td class="num">${isFinite(be)?Math.round(be*100)+'%':'—'}</td><td>${pill}</td></tr>`;};
  PRODUCTS.forEach(p=>{h+=row(p.name,sum(pick({months:pm,prod:p.id,b2c:true})));});
