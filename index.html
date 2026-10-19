@@ -111,12 +111,12 @@ td.neg{color:var(--red)}
  <header class="top">
   <div>
    <h1>영업이익 대시보드</h1>
-   <p class="sub">2026년 1~9월 · <b id="scope" style="color:var(--fg);font-weight:600">B2C (B2B 제외)</b> · 부가세 포함 · 쿠팡·M몰은 공급가 기준</p>
+   <p class="sub">2026년 1~9월 · <b id="scope" style="color:var(--fg);font-weight:600">B2C + B2B</b> · 부가세 포함 · 쿠팡·M몰은 공급가 기준</p>
   </div>
   <div class="top-actions">
   <div class="theme-toggle" role="group" aria-label="B2B 포함 여부">
-   <button class="b2b-btn" data-b2b="0">B2B 제외</button>
-   <button class="b2b-btn" data-b2b="1">B2B 추가</button>
+   <button class="b2b-btn" data-b2b="0" aria-pressed="false">B2B 제외</button>
+   <button class="b2b-btn" data-b2b="1" aria-pressed="true">B2B 포함</button>
   </div>
   <div class="theme-toggle" role="group" aria-label="화면 모드">
    <button class="theme-btn" data-mode="light">☀️ 일반모드</button>
@@ -214,8 +214,8 @@ td.neg{color:var(--red)}
    <li><b>쿠팡</b>은 공급가 매출이며, 쿠팡이 사입해 가므로 포장비와 배송 원가가 없습니다.</li>
    <li><b>배송 건수</b>: 판매수량 1개 = 주문 1건. 액정보호필름, 프레임팁, 스탠드케이스는 부속으로 보고 배송 건수에서 뺐습니다.</li>
    <li><b>광고</b>: META·구글·카카오·네이버 SA·GFA는 자사몰·네이버, 쿠팡 광고는 쿠팡에 배분했습니다. 1월 광고비는 제품별 금액의 합(52,554,564원)을 씁니다.</li>
-   <li><b>B2B</b>(B2B 추가 시): 매출에서 제품 원가만 뺍니다. PH스탠드는 7월까지 1.0 원가 11,020원, 8월부터 2.0 원가 16,684원, 킥프레임은 8,377원입니다. 아이디바이는 원가가 없어 임시로 매출의 35%로 잡았습니다. 아이디바이는 제품별 차트에서 기타에 들어갑니다.</li>
-   <li><b>광고비율·ROAS·개당 수익 구조</b>는 B2B 추가 여부와 관계없이 B2C 기준입니다.</li>
+   <li><b>B2B</b>(B2B 포함 시): 매출에서 제품 원가만 뺍니다. PH스탠드는 7월까지 1.0 원가 11,020원, 8월부터 2.0 원가 16,684원, 킥프레임은 8,377원입니다. 아이디바이는 원가가 없어 임시로 매출의 35%로 잡았습니다. 아이디바이는 제품별 차트에서 기타에 들어갑니다.</li>
+   <li><b>광고비율·ROAS·개당 수익 구조</b>는 B2B 포함 여부와 관계없이 B2C 기준입니다.</li>
    <li><b>고정비·변동비</b>는 주신 월별 금액 그대로이며, 6월 변동비는 빈칸이라 0원으로 봤습니다.</li>
   </ul>
  </section>
@@ -231,7 +231,7 @@ const CH_COLOR={direct:'var(--blue)',cp:'var(--yellow)',mmall:'var(--green)',b2b
 const MONTHS=['1월','2월','3월','4월','5월','6월','7월','8월','9월'];
 const CUM=`1~${MONTHS.length}월`;
 const CELLS=DATA.cells, ALL=MONTHS.map((_,i)=>i);
-const S={month:'all',b2b:false};
+const S={month:'all',b2b:true};
 const $=id=>document.getElementById(id);
 const NS='http://www.w3.org/2000/svg';
 const man=v=>(v<0?'−':'')+Math.round(Math.abs(v)/1e4).toLocaleString('ko-KR');
